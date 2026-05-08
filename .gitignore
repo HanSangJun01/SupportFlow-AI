@@ -32,3 +32,4 @@ docker-data/
 # Secrets
 application-secret.yml
 .env.local
+.codex/
