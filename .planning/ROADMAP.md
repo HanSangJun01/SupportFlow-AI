@@ -49,12 +49,25 @@ super-admin tenant provisioning
   3. Invalid ticket lifecycle transitions are rejected by backend rules.
   4. Automated tests prove tenant-scoped queries and cross-tenant denial for implemented foundation APIs.
 **Plans**: 4 plans
+**Planning Status**: Ready to execute (planned 2026-05-08)
 
 Plans:
+**Wave 1**
 - [ ] 01-01: Set up Spring Boot project structure, configuration, and MongoDB connectivity
+
+**Wave 2** *(blocked on 01-01 completion)*
 - [ ] 01-02: Implement tenant workspace basics and core ticket APIs
+
+**Wave 3** *(blocked on 01-02 completion)*
 - [ ] 01-03: Implement ticket lifecycle transition rules and tenant-aware persistence boundaries
+
+**Wave 4** *(blocked on 01-03 completion)*
 - [ ] 01-04: Add REST API documentation and foundation unit/integration tests
+
+Cross-cutting constraints:
+- Tenant identity for tenant-scoped APIs uses URL paths such as `/api/v1/tenants/{tenantId}/tickets`.
+- Ticket data access must remain tenant-aware by default; cross-tenant read/write denial must be proven through HTTP integration tests.
+- Phase 1 remains backend-only: no frontend, authentication, AI service integration, Redis runtime dependency, tenant update workflow, or full ticket history.
 
 ### Phase 2: Tenant Workflow Core
 **Goal**: Expand the operational core with tenant metadata, operational user/role metadata, ticket ownership fields, history tracking, and prioritization-ready workflow data.
@@ -185,7 +198,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Backend Foundation | 0/4 | Not started | - |
+| 1. Backend Foundation | 0/4 | Ready to execute | - |
 | 2. Tenant Workflow Core | 0/3 | Not started | - |
 | 3. Knowledge Base Core | 0/2 | Not started | - |
 | 4. AI Classification Integration | 0/3 | Not started | - |

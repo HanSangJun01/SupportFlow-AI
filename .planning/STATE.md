@@ -11,8 +11,8 @@ See: .planning/PROJECT.md (updated 2026-05-07)
 
 Phase: 1 of 10 (Backend Foundation)
 Plan: 0 of 4 in current phase
-Status: Ready to plan
-Last activity: 2026-05-07 — Project initialized, research completed, requirements and roadmap drafted
+Status: Ready to execute
+Last activity: 2026-05-08 — Phase 1 research, validation strategy, walking skeleton, and 4 execution plans created
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -43,6 +43,8 @@ Recent decisions affecting current work:
 - [Initialization]: Phase 1 stays backend-only and foundation-focused
 - [Initialization]: Tenant isolation is enforced from the beginning
 - [Initialization]: AI output requires human review and approval
+- [Phase 1 Planning]: Use Spring Boot 3.5.14 on Java 21 with MongoDB, Springdoc OpenAPI, JUnit Jupiter, and Testcontainers for the backend foundation
+- [Phase 1 Planning]: Phase 1 execution is split into 4 sequential plans: scaffold, tenant/ticket APIs, lifecycle/isolation, docs/verification
 
 ### Pending Todos
 
