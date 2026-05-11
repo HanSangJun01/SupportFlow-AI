@@ -16,6 +16,10 @@ public class TenantService {
     }
 
     public Tenant createTenant(String name, String slug, String description) {
+        if (tenantRepository.existsBySlug(slug)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Tenant slug already exists");
+        }
+
         Instant now = Instant.now();
         Tenant tenant = new Tenant();
         tenant.setName(name);

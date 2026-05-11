@@ -67,6 +67,23 @@ class TenantApiIntegrationTest {
                 .andExpect(content().string(containsString("Tenant not found")));
     }
 
+    @Test
+    void createDuplicateTenantSlugReturns409() throws Exception {
+        when(tenantService.createTenant("Acme Support", "acme", null))
+                .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Tenant slug already exists"));
+
+        mockMvc.perform(post("/api/v1/tenants")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "name": "Acme Support",
+                                  "slug": "acme"
+                                }
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(content().string(containsString("Tenant slug already exists")));
+    }
+
     private Tenant tenant(String id, String name, String slug) {
         Tenant tenant = new Tenant();
         tenant.setId(id);

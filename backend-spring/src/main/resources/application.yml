@@ -4,6 +4,7 @@ spring:
   data:
     mongodb:
       uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/supportflow}
+      auto-index-creation: true
 
 server:
   port: 8080
