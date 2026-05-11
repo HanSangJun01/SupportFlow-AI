@@ -9,18 +9,18 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Tenant Administration
 
-- [ ] **TEN-01**: Super admin can create a tenant workspace with unique tenant identity and metadata.
+- [x] **TEN-01**: Super admin can create a tenant workspace with unique tenant identity and metadata.
 - [ ] **TEN-02**: Super admin can list and view tenant workspaces.
 - [ ] **TEN-03**: Super admin can update tenant workspace metadata and operational status.
 - [ ] **TEN-04**: Tenant-scoped users and roles can be represented as basic operational metadata within a tenant workspace before full authentication and richer RBAC are introduced.
 
 ### Ticket Operations
 
-- [ ] **TICK-01**: Support agent can create a customer inquiry ticket inside a tenant workspace.
-- [ ] **TICK-02**: Support agent can list tickets for a tenant workspace with filtering by status, priority, assignee, and created date.
-- [ ] **TICK-03**: Support agent can view ticket detail including inquiry content, current status, category, priority, assignee, prioritization-related fields, and history.
+- [x] **TICK-01**: Support agent can create a customer inquiry ticket inside a tenant workspace.
+- [x] **TICK-02**: Support agent can list tickets for a tenant workspace with filtering by status, priority, assignee, and created date.
+- [x] **TICK-03**: Support agent can view ticket detail including inquiry content, current status, category, priority, assignee, prioritization-related fields, and history.
 - [ ] **TICK-04**: Support agent can update ticket ownership and operational fields allowed by workflow rules.
-- [ ] **TICK-05**: Every ticket stores the tenant identifier and remains isolated to that tenant.
+- [x] **TICK-05**: Every ticket stores the tenant identifier and remains isolated to that tenant.
 
 ### Ticket Workflow
 
@@ -32,8 +32,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Tenant Isolation
 
-- [ ] **ISO-01**: Every tenant-scoped resource includes `tenantId`.
-- [ ] **ISO-02**: Every tenant-scoped query is constrained by `tenantId`.
+- [x] **ISO-01**: Every tenant-scoped resource includes `tenantId`.
+- [x] **ISO-02**: Every tenant-scoped query is constrained by `tenantId`.
 - [ ] **ISO-03**: One tenant cannot access another tenant’s tickets, knowledge documents, drafts, logs, history, or metrics.
 - [ ] **ISO-04**: Automated integration tests verify cross-tenant access is denied for reads and writes.
 
@@ -149,22 +149,22 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TEN-01 | Phase 1 | Pending |
+| TEN-01 | Phase 1 | Complete |
 | TEN-02 | Phase 2 | Pending |
 | TEN-03 | Phase 2 | Pending |
 | TEN-04 | Phase 2 | Pending |
-| TICK-01 | Phase 1 | Pending |
-| TICK-02 | Phase 1 | Pending |
-| TICK-03 | Phase 1 | Pending |
+| TICK-01 | Phase 1 | Complete |
+| TICK-02 | Phase 1 | Complete |
+| TICK-03 | Phase 1 | Complete |
 | TICK-04 | Phase 2 | Pending |
-| TICK-05 | Phase 1 | Pending |
+| TICK-05 | Phase 1 | Complete |
 | FLOW-01 | Phase 1 | Pending |
 | FLOW-02 | Phase 1 | Pending |
 | FLOW-03 | Phase 2 | Pending |
 | FLOW-04 | Phase 2 | Pending |
 | FLOW-05 | Phase 2 | Pending |
-| ISO-01 | Phase 1 | Pending |
-| ISO-02 | Phase 1 | Pending |
+| ISO-01 | Phase 1 | Complete |
+| ISO-02 | Phase 1 | Complete |
 | ISO-03 | Phase 2 | Pending |
 | ISO-04 | Phase 1 | Pending |
 | KNOW-01 | Phase 3 | Pending |

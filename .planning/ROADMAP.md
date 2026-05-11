@@ -56,7 +56,7 @@ Plans:
 - [x] 01-01: Set up Spring Boot project structure, configuration, and MongoDB connectivity
 
 **Wave 2** *(blocked on 01-01 completion)*
-- [ ] 01-02: Implement tenant workspace basics and core ticket APIs
+- [x] 01-02: Implement tenant workspace basics and core ticket APIs
 
 **Wave 3** *(blocked on 01-02 completion)*
 - [ ] 01-03: Implement ticket lifecycle transition rules and tenant-aware persistence boundaries
@@ -198,7 +198,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Backend Foundation | 1/4 | In Progress | - |
+| 1. Backend Foundation | 2/4 | In Progress | - |
 | 2. Tenant Workflow Core | 0/3 | Not started | - |
 | 3. Knowledge Base Core | 0/2 | Not started | - |
 | 4. AI Classification Integration | 0/3 | Not started | - |
