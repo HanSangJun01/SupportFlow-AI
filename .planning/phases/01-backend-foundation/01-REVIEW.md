@@ -42,4 +42,4 @@ Fix:
 
 ## Residual Risk
 
-Docker is unavailable in this shell, so Docker-backed Mongo/Testcontainers execution is represented by a committed test that is skipped automatically until Docker is installed/running.
+No open review findings remain. Docker-backed Mongo/Testcontainers verification has been executed successfully after Docker became available.

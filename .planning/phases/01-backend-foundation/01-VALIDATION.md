@@ -1,10 +1,11 @@
 ---
 phase: 1
 slug: backend-foundation
-status: draft
+status: approved
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-05-08
+approved: 2026-05-11
 ---
 
 # Phase 1 — Validation Strategy
@@ -38,14 +39,14 @@ created: 2026-05-08
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 01-01-01 | 01-01 | 1 | QUAL-06 | T-01-01 | Backend starts without Redis and connects to MongoDB configuration | build/smoke | `cd backend-spring && ./mvnw test` | ❌ W0 | ⬜ pending |
-| 01-01-02 | 01-01 | 1 | QUAL-06 | T-01-02 | Docker Compose exposes MongoDB and backend local run path | build/smoke | `docker compose config && cd backend-spring && ./mvnw test` | ❌ W0 | ⬜ pending |
-| 01-02-01 | 01-02 | 2 | TEN-01 | T-02-01 | Tenant create/list/detail reject invalid input and produce server-generated IDs | integration | `cd backend-spring && ./mvnw test -Dtest=TenantApiIntegrationTest` | ❌ W0 | ⬜ pending |
-| 01-02-02 | 01-02 | 2 | TICK-01,TICK-02,TICK-03,TICK-05,ISO-01,ISO-02 | T-02-02 | Ticket create/list/detail always require tenant path scope | integration | `cd backend-spring && ./mvnw test -Dtest=TicketApiIntegrationTest` | ❌ W0 | ⬜ pending |
-| 01-03-01 | 01-03 | 3 | FLOW-01,FLOW-02 | T-03-01 | Invalid status transitions are rejected | unit | `cd backend-spring && ./mvnw test -Dtest=TicketStatusTransitionPolicyTest` | ❌ W0 | ⬜ pending |
-| 01-03-02 | 01-03 | 3 | ISO-01,ISO-02,ISO-04 | T-03-02 | Cross-tenant ticket reads and status updates return 404 | integration | `cd backend-spring && ./mvnw test -Dtest=TenantIsolationIntegrationTest` | ❌ W0 | ⬜ pending |
-| 01-04-01 | 01-04 | 4 | QUAL-01 | T-04-01 | OpenAPI docs expose only planned Phase 1 routes | integration | `cd backend-spring && ./mvnw test -Dtest=OpenApiDocumentationTest` | ❌ W0 | ⬜ pending |
-| 01-04-02 | 01-04 | 4 | QUAL-02,QUAL-03,QUAL-06 | T-04-02 | Full unit and integration suite verifies Phase 1 behavior | full suite | `cd backend-spring && ./mvnw verify` | ❌ W0 | ⬜ pending |
+| 01-01-01 | 01-01 | 1 | QUAL-06 | T-01-01 | Backend starts without Redis and connects to MongoDB configuration | build/smoke | `cd backend-spring && ./mvnw test` | ✅ | ✅ green |
+| 01-01-02 | 01-01 | 1 | QUAL-06 | T-01-02 | Docker Compose exposes MongoDB and backend local run path | build/smoke | `docker compose config && cd backend-spring && ./mvnw test` | ✅ | ✅ green |
+| 01-02-01 | 01-02 | 2 | TEN-01 | T-02-01 | Tenant create/list/detail reject invalid input and produce server-generated IDs | integration | `cd backend-spring && ./mvnw test -Dtest=TenantApiIntegrationTest` | ✅ | ✅ green |
+| 01-02-02 | 01-02 | 2 | TICK-01,TICK-02,TICK-03,TICK-05,ISO-01,ISO-02 | T-02-02 | Ticket create/list/detail always require tenant path scope | integration | `cd backend-spring && ./mvnw test -Dtest=TicketApiIntegrationTest` | ✅ | ✅ green |
+| 01-03-01 | 01-03 | 3 | FLOW-01,FLOW-02 | T-03-01 | Invalid status transitions are rejected | unit | `cd backend-spring && ./mvnw test -Dtest=TicketStatusTransitionPolicyTest` | ✅ | ✅ green |
+| 01-03-02 | 01-03 | 3 | ISO-01,ISO-02,ISO-04 | T-03-02 | Cross-tenant ticket reads and status updates return 404 | integration | `cd backend-spring && ./mvnw test -Dtest=TenantIsolationIntegrationTest` | ✅ | ✅ green |
+| 01-04-01 | 01-04 | 4 | QUAL-01 | T-04-01 | OpenAPI docs expose only planned Phase 1 routes | integration | `cd backend-spring && ./mvnw test -Dtest=OpenApiDocumentationTest` | ✅ | ✅ green |
+| 01-04-02 | 01-04 | 4 | QUAL-02,QUAL-03,QUAL-06 | T-04-02 | Full unit and integration suite verifies Phase 1 behavior | full suite | `cd backend-spring && ./mvnw verify` | ✅ | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -53,9 +54,9 @@ created: 2026-05-08
 
 ## Wave 0 Requirements
 
-- [ ] `backend-spring/pom.xml` — Maven test framework, Spring Boot, and Testcontainers dependencies.
-- [ ] `backend-spring/src/test/java/com/supportflow/**` — unit and integration test directories.
-- [ ] `backend-spring/mvnw` — Maven wrapper generated or copied through standard Maven wrapper tooling.
+- [x] `backend-spring/pom.xml` — Maven test framework, Spring Boot, and Testcontainers dependencies.
+- [x] `backend-spring/src/test/java/com/supportflow/**` — unit and integration test directories.
+- [x] `backend-spring/mvnw` — Maven wrapper generated or copied through standard Maven wrapper tooling.
 
 ---
 
@@ -76,5 +77,4 @@ created: 2026-05-08
 - [x] Feedback latency target is under 120 seconds after dependency warmup.
 - [x] `nyquist_compliant: true` set in frontmatter.
 
-**Approval:** pending
-
+**Approval:** approved 2026-05-11 after `docker compose config` and Docker-backed `MAVEN_USER_HOME=.m2 ./mvnw -Dmaven.repo.local=.m2/repository verify` passed with 19 tests run, 0 failures, 0 errors, and 0 skipped.

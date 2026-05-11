@@ -106,13 +106,14 @@ Each task was committed atomically:
 ## Issues Encountered
 
 - `./mvnw verify` required one additional network-enabled Maven run to download verify/package plugins.
-- Docker CLI remains unavailable in this shell, so Compose execution and Docker-backed Testcontainers are not locally proven here.
+- Initial execution environment did not expose Docker, so Compose execution and Docker-backed Testcontainers were rechecked after Docker became available.
 
 ## Verification
 
 - PASS: `MAVEN_USER_HOME=.m2 ./mvnw -Dmaven.repo.local=.m2/repository test -Dtest=OpenApiDocumentationTest`
 - PASS: `MAVEN_USER_HOME=.m2 ./mvnw -Dmaven.repo.local=.m2/repository test -Dtest=FoundationVerificationTest`
-- PASS: `MAVEN_USER_HOME=.m2 ./mvnw -Dmaven.repo.local=.m2/repository verify` (17 tests discovered; 1 Docker-backed Testcontainers test skipped because Docker is unavailable in this shell)
+- PASS: `MAVEN_USER_HOME=.m2 ./mvnw -Dmaven.repo.local=.m2/repository verify` (19 tests run; 0 failures, 0 errors, 0 skipped; Docker-backed Testcontainers executed)
+- PASS: `docker compose config`
 - PASS: README contains `docker compose up -d mongodb`, `./mvnw verify`, `/v3/api-docs`, and `/swagger-ui.html`.
 - PASS: API contract doc lists all Phase 1 endpoints and deferred Phase 2 items.
 
@@ -122,7 +123,7 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 
-Phase 1 backend foundation is complete and ready for phase verification. Remaining environment caveat: Docker must be installed/running to execute Compose and true MongoDB Testcontainers checks.
+Phase 1 backend foundation is complete and ready for Phase 2 planning. Docker-backed Compose parsing and MongoDB Testcontainers checks have passed.
 
 ## Self-Check: PASSED
 
