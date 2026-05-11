@@ -1,0 +1,27 @@
+#!/bin/sh
+set -e
+
+BASE_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+WRAPPER_PROPS="$BASE_DIR/.mvn/wrapper/maven-wrapper.properties"
+MAVEN_USER_HOME="${MAVEN_USER_HOME:-$HOME/.m2}"
+DIST_URL="$(sed -n 's/^distributionUrl=//p' "$WRAPPER_PROPS")"
+DIST_NAME="$(basename "$DIST_URL" .zip)"
+MAVEN_DIR="${DIST_NAME%-bin}"
+DIST_DIR="$MAVEN_USER_HOME/wrapper/dists/$DIST_NAME"
+MAVEN_BIN="$DIST_DIR/$MAVEN_DIR/bin/mvn"
+
+if [ ! -x "$MAVEN_BIN" ]; then
+  mkdir -p "$DIST_DIR"
+  TMP_ZIP="$DIST_DIR/$DIST_NAME.zip"
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$DIST_URL" -o "$TMP_ZIP"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -q "$DIST_URL" -O "$TMP_ZIP"
+  else
+    echo "curl or wget is required to bootstrap Maven" >&2
+    exit 1
+  fi
+  unzip -q "$TMP_ZIP" -d "$DIST_DIR"
+fi
+
+exec "$MAVEN_BIN" "$@"
