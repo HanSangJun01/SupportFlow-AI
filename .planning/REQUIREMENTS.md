@@ -24,8 +24,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Ticket Workflow
 
-- [ ] **FLOW-01**: Ticket supports explicit lifecycle states `NEW`, `TRIAGED`, `IN_PROGRESS`, `ANSWERED`, and `CLOSED`.
-- [ ] **FLOW-02**: System rejects invalid ticket state transitions according to defined workflow rules.
+- [x] **FLOW-01**: Ticket supports explicit lifecycle states `NEW`, `TRIAGED`, `IN_PROGRESS`, `ANSWERED`, and `CLOSED`.
+- [x] **FLOW-02**: System rejects invalid ticket state transitions according to defined workflow rules.
 - [ ] **FLOW-03**: System records ticket status transition history with actor and timestamp.
 - [ ] **FLOW-04**: System stores category, urgency, sentiment, priority, and optional simple SLA-risk-supporting fields on tickets where useful for prioritization and reporting.
 - [ ] **FLOW-05**: System does not require a full SLA policy, escalation, notification, or scheduling engine in v1.
@@ -35,7 +35,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **ISO-01**: Every tenant-scoped resource includes `tenantId`.
 - [x] **ISO-02**: Every tenant-scoped query is constrained by `tenantId`.
 - [ ] **ISO-03**: One tenant cannot access another tenant’s tickets, knowledge documents, drafts, logs, history, or metrics.
-- [ ] **ISO-04**: Automated integration tests verify cross-tenant access is denied for reads and writes.
+- [x] **ISO-04**: Automated integration tests verify cross-tenant access is denied for reads and writes.
 
 ### Knowledge Base
 
@@ -158,15 +158,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TICK-03 | Phase 1 | Complete |
 | TICK-04 | Phase 2 | Pending |
 | TICK-05 | Phase 1 | Complete |
-| FLOW-01 | Phase 1 | Pending |
-| FLOW-02 | Phase 1 | Pending |
+| FLOW-01 | Phase 1 | Complete |
+| FLOW-02 | Phase 1 | Complete |
 | FLOW-03 | Phase 2 | Pending |
 | FLOW-04 | Phase 2 | Pending |
 | FLOW-05 | Phase 2 | Pending |
 | ISO-01 | Phase 1 | Complete |
 | ISO-02 | Phase 1 | Complete |
 | ISO-03 | Phase 2 | Pending |
-| ISO-04 | Phase 1 | Pending |
+| ISO-04 | Phase 1 | Complete |
 | KNOW-01 | Phase 3 | Pending |
 | KNOW-02 | Phase 3 | Pending |
 | KNOW-03 | Phase 3 | Pending |

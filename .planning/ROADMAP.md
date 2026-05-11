@@ -59,7 +59,7 @@ Plans:
 - [x] 01-02: Implement tenant workspace basics and core ticket APIs
 
 **Wave 3** *(blocked on 01-02 completion)*
-- [ ] 01-03: Implement ticket lifecycle transition rules and tenant-aware persistence boundaries
+- [x] 01-03: Implement ticket lifecycle transition rules and tenant-aware persistence boundaries
 
 **Wave 4** *(blocked on 01-03 completion)*
 - [ ] 01-04: Add REST API documentation and foundation unit/integration tests
@@ -198,7 +198,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Backend Foundation | 2/4 | In Progress | - |
+| 1. Backend Foundation | 3/4 | In Progress | - |
 | 2. Tenant Workflow Core | 0/3 | Not started | - |
 | 3. Knowledge Base Core | 0/2 | Not started | - |
 | 4. AI Classification Integration | 0/3 | Not started | - |
