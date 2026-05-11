@@ -12,7 +12,7 @@ SupportFlow AI will be built as a backend-first, vertical MVP support operations
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Backend Foundation** - Establish the Spring Boot and MongoDB base with tenant-aware ticket APIs and tests.
+- [x] **Phase 1: Backend Foundation** - Establish the Spring Boot and MongoDB base with tenant-aware ticket APIs and tests.
 - [ ] **Phase 2: Tenant Workflow Core** - Harden tenant workspace operations, workflow rules, and ticket history.
 - [ ] **Phase 3: Knowledge Base Core** - Add tenant-scoped FAQ and policy document management for later retrieval.
 - [ ] **Phase 4: AI Classification Integration** - Introduce the separate AI service and ticket classification workflow.
@@ -62,7 +62,7 @@ Plans:
 - [x] 01-03: Implement ticket lifecycle transition rules and tenant-aware persistence boundaries
 
 **Wave 4** *(blocked on 01-03 completion)*
-- [ ] 01-04: Add REST API documentation and foundation unit/integration tests
+- [x] 01-04: Add REST API documentation and foundation unit/integration tests
 
 Cross-cutting constraints:
 - Tenant identity for tenant-scoped APIs uses URL paths such as `/api/v1/tenants/{tenantId}/tickets`.
@@ -198,7 +198,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Backend Foundation | 3/4 | In Progress | - |
+| 1. Backend Foundation | 4/4 | Complete | 2026-05-11 |
 | 2. Tenant Workflow Core | 0/3 | Not started | - |
 | 3. Knowledge Base Core | 0/2 | Not started | - |
 | 4. AI Classification Integration | 0/3 | Not started | - |

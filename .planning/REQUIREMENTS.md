@@ -76,9 +76,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Quality and Verification
 
-- [ ] **QUAL-01**: Backend APIs are documented through REST-first API documentation suitable for verification and frontend consumption.
-- [ ] **QUAL-02**: Spring backend includes unit tests for core domain and workflow rules.
-- [ ] **QUAL-03**: Spring backend includes integration tests with MongoDB using Testcontainers; Redis-backed integration tests are added only in phases that actually depend on Redis.
+- [x] **QUAL-01**: Backend APIs are documented through REST-first API documentation suitable for verification and frontend consumption.
+- [x] **QUAL-02**: Spring backend includes unit tests for core domain and workflow rules.
+- [x] **QUAL-03**: Spring backend includes integration tests with MongoDB using Testcontainers; Redis-backed integration tests are added only in phases that actually depend on Redis.
 - [ ] **QUAL-04**: Python AI service includes automated tests for classification, retrieval, and draft-generation contracts.
 - [ ] **QUAL-05**: Harnesses verify the behaviors implemented in each phase, including core domain rules, API behavior, tenant isolation, and AI workflow integration where present.
 - [x] **QUAL-06**: Local development environment is reproducible through Docker Compose.
@@ -189,9 +189,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MET-02 | Phase 7 | Pending |
 | MET-03 | Phase 7 | Pending |
 | MET-04 | Phase 7 | Pending |
-| QUAL-01 | Phase 1 | Pending |
-| QUAL-02 | Phase 1 | Pending |
-| QUAL-03 | Phase 1 | Pending |
+| QUAL-01 | Phase 1 | Complete |
+| QUAL-02 | Phase 1 | Complete |
+| QUAL-03 | Phase 1 | Complete |
 | QUAL-04 | Phase 4 | Pending |
 | QUAL-05 | Phase 7 | Pending |
 | QUAL-06 | Phase 1 | Complete |
