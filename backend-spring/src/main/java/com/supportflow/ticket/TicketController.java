@@ -3,6 +3,8 @@ package com.supportflow.ticket;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.URI;
 import java.time.Instant;
 import java.util.List;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/tenants/{tenantId}/tickets")
+@Tag(name = "Tickets", description = "Tenant-scoped ticket foundation APIs")
 public class TicketController {
 
     private final TicketService ticketService;
@@ -28,6 +31,7 @@ public class TicketController {
     }
 
     @PostMapping
+    @Operation(summary = "Create a tenant-scoped ticket")
     public ResponseEntity<TicketResponse> createTicket(@PathVariable String tenantId,
             @Valid @RequestBody CreateTicketRequest request) {
         Ticket ticket = ticketService.createTicket(tenantId, new TicketService.CreateTicketCommand(
@@ -44,6 +48,7 @@ public class TicketController {
     }
 
     @GetMapping
+    @Operation(summary = "List tenant-scoped tickets")
     public List<TicketResponse> listTickets(
             @PathVariable String tenantId,
             @RequestParam(required = false) TicketStatus status,
@@ -60,11 +65,13 @@ public class TicketController {
     }
 
     @GetMapping("/{ticketId}")
+    @Operation(summary = "Get a tenant-scoped ticket")
     public TicketResponse getTicket(@PathVariable String tenantId, @PathVariable String ticketId) {
         return TicketResponse.from(ticketService.getTicket(tenantId, ticketId));
     }
 
     @PatchMapping("/{ticketId}/status")
+    @Operation(summary = "Update a tenant-scoped ticket status")
     public TicketResponse updateStatus(@PathVariable String tenantId, @PathVariable String ticketId,
             @Valid @RequestBody UpdateTicketStatusRequest request) {
         return TicketResponse.from(ticketService.updateStatus(tenantId, ticketId, request.status()));
