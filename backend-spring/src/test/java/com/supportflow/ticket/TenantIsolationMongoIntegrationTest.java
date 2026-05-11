@@ -50,10 +50,14 @@ class TenantIsolationMongoIntegrationTest {
                 HttpMethod.PATCH,
                 new HttpEntity<>(new StatusUpdateRequest(TicketStatus.TRIAGED)),
                 TicketResponse.class);
+        ResponseEntity<TicketResponse[]> tenantBList = restTemplate.getForEntity(
+                url("/api/v1/tenants/" + tenantB.id() + "/tickets"), TicketResponse[].class);
 
         assertThat(ownRead.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(crossRead.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(crossPatch.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(tenantBList.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(tenantBList.getBody()).isEmpty();
     }
 
     private TenantCreateResponse createTenant(String name, String slug) {
