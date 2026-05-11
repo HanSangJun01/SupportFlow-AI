@@ -5,7 +5,7 @@ milestone_name: milestone
 status: phase-complete
 stopped_at: Completed Phase 01 execution
 last_updated: "2026-05-11T10:26:10.605Z"
-last_activity: 2026-05-11 -- Completed Phase 01 Plan 04 documentation and verification
+last_activity: 2026-05-11 -- Verified Phase 01 backend foundation
 progress:
   total_phases: 7
   completed_phases: 1
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-05-07)
 Phase: 01 (backend-foundation) — COMPLETE
 Plan: 4 of 4
 Status: Phase 01 complete; ready for Phase 02 planning or execution
-Last activity: 2026-05-11 -- Completed Phase 01 Plan 04 documentation and verification
+Last activity: 2026-05-11 -- Verified Phase 01 backend foundation
 
 Progress: [██████████] 100%
 
@@ -72,6 +72,7 @@ Recent decisions affecting current work:
 - [Phase 1 Execution]: Plan 01-02 added tenant create/list/detail APIs and tenant-scoped ticket create/list/detail APIs
 - [Phase 1 Execution]: Plan 01-03 added explicit ticket lifecycle rules, status mutation, and cross-tenant denial coverage
 - [Phase 1 Execution]: Plan 01-04 added OpenAPI documentation, API contract docs, README run/test instructions, and foundation verification coverage
+- [Phase 1 Review]: Tenant slug uniqueness is enforced in service logic and backed by Mongo auto-index creation
 
 ### Pending Todos
 
