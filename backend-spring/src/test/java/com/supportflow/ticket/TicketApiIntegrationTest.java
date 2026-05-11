@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -14,8 +15,10 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 
 @WebMvcTest(controllers = {TicketController.class, GlobalExceptionHandler.class})
 class TicketApiIntegrationTest {
@@ -73,6 +76,33 @@ class TicketApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value("ticket-1"))
                 .andExpect(jsonPath("$.tenantId").value("tenant-1"));
+    }
+
+    @Test
+    void updateStatusReturnsUpdatedTicket() throws Exception {
+        when(ticketService.updateStatus("tenant-1", "ticket-1", TicketStatus.TRIAGED))
+                .thenReturn(ticket("ticket-1", "tenant-1", TicketStatus.TRIAGED));
+
+        mockMvc.perform(patch("/api/v1/tenants/tenant-1/tickets/ticket-1/status")
+                        .contentType("application/json")
+                        .content("""
+                                { "status": "TRIAGED" }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("TRIAGED"));
+    }
+
+    @Test
+    void invalidStatusTransitionReturns400() throws Exception {
+        when(ticketService.updateStatus("tenant-1", "ticket-1", TicketStatus.CLOSED))
+                .thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ticket status transition"));
+
+        mockMvc.perform(patch("/api/v1/tenants/tenant-1/tickets/ticket-1/status")
+                        .contentType("application/json")
+                        .content("""
+                                { "status": "CLOSED" }
+                                """))
+                .andExpect(status().isBadRequest());
     }
 
     private Ticket ticket(String id, String tenantId, TicketStatus status) {

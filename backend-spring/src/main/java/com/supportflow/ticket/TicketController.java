@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -63,6 +64,12 @@ public class TicketController {
         return TicketResponse.from(ticketService.getTicket(tenantId, ticketId));
     }
 
+    @PatchMapping("/{ticketId}/status")
+    public TicketResponse updateStatus(@PathVariable String tenantId, @PathVariable String ticketId,
+            @Valid @RequestBody UpdateTicketStatusRequest request) {
+        return TicketResponse.from(ticketService.updateStatus(tenantId, ticketId, request.status()));
+    }
+
     public record CreateTicketRequest(
             @NotBlank String subject,
             @NotBlank String customerName,
@@ -71,6 +78,11 @@ public class TicketController {
             String category,
             TicketPriority priority,
             String assigneeId
+    ) {
+    }
+
+    public record UpdateTicketStatusRequest(
+            @jakarta.validation.constraints.NotNull TicketStatus status
     ) {
     }
 

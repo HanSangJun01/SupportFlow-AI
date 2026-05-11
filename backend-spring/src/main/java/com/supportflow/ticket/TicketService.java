@@ -14,10 +14,13 @@ public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final TenantService tenantService;
+    private final TicketStatusTransitionPolicy transitionPolicy;
 
-    public TicketService(TicketRepository ticketRepository, TenantService tenantService) {
+    public TicketService(TicketRepository ticketRepository, TenantService tenantService,
+            TicketStatusTransitionPolicy transitionPolicy) {
         this.ticketRepository = ticketRepository;
         this.tenantService = tenantService;
+        this.transitionPolicy = transitionPolicy;
     }
 
     public Ticket createTicket(String tenantId, CreateTicketCommand command) {
@@ -55,6 +58,14 @@ public class TicketService {
         tenantService.getTenant(tenantId);
         return ticketRepository.findByTenantIdAndId(tenantId, ticketId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
+    }
+
+    public Ticket updateStatus(String tenantId, String ticketId, TicketStatus status) {
+        Ticket ticket = getTicket(tenantId, ticketId);
+        transitionPolicy.validateTransition(ticket.getStatus(), status);
+        ticket.setStatus(status);
+        ticket.setUpdatedAt(Instant.now());
+        return ticketRepository.save(ticket);
     }
 
     public record CreateTicketCommand(
