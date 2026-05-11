@@ -81,7 +81,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **QUAL-03**: Spring backend includes integration tests with MongoDB using Testcontainers; Redis-backed integration tests are added only in phases that actually depend on Redis.
 - [ ] **QUAL-04**: Python AI service includes automated tests for classification, retrieval, and draft-generation contracts.
 - [ ] **QUAL-05**: Harnesses verify the behaviors implemented in each phase, including core domain rules, API behavior, tenant isolation, and AI workflow integration where present.
-- [ ] **QUAL-06**: Local development environment is reproducible through Docker Compose.
+- [x] **QUAL-06**: Local development environment is reproducible through Docker Compose.
 
 ## v2 Requirements
 
@@ -194,7 +194,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | QUAL-03 | Phase 1 | Pending |
 | QUAL-04 | Phase 4 | Pending |
 | QUAL-05 | Phase 7 | Pending |
-| QUAL-06 | Phase 1 | Pending |
+| QUAL-06 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 46 total

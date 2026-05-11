@@ -53,7 +53,7 @@ super-admin tenant provisioning
 
 Plans:
 **Wave 1**
-- [ ] 01-01: Set up Spring Boot project structure, configuration, and MongoDB connectivity
+- [x] 01-01: Set up Spring Boot project structure, configuration, and MongoDB connectivity
 
 **Wave 2** *(blocked on 01-01 completion)*
 - [ ] 01-02: Implement tenant workspace basics and core ticket APIs
@@ -198,7 +198,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Backend Foundation | 0/4 | Ready to execute | - |
+| 1. Backend Foundation | 1/4 | In Progress | - |
 | 2. Tenant Workflow Core | 0/3 | Not started | - |
 | 3. Knowledge Base Core | 0/2 | Not started | - |
 | 4. AI Classification Integration | 0/3 | Not started | - |
