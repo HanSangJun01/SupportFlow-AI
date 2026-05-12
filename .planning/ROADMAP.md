@@ -39,7 +39,7 @@ super-admin tenant provisioning
 ## Phase Details
 
 ### Phase 1: Backend Foundation
-**Goal**: Deliver a stable backend-only operational foundation with Spring Boot, MongoDB, tenant workspace basics, ticket create/list/detail APIs, explicit lifecycle rules, tenant isolation, tests, and REST API documentation.
+**Goal**: As a system-level admin and support operator, I want to create tenant workspaces and manage tenant-scoped customer inquiry tickets through documented backend APIs, so that SupportFlow AI has a reliable multi-tenant backend foundation before AI, frontend, and authentication features are added.
 **Mode:** mvp
 **Depends on**: Nothing (first phase)
 **Requirements**: [TEN-01, TICK-01, TICK-02, TICK-03, TICK-05, FLOW-01, FLOW-02, ISO-01, ISO-02, ISO-04, QUAL-01, QUAL-02, QUAL-03, QUAL-06]
