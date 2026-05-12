@@ -1,5 +1,6 @@
 # OS
 .DS_Store
+backend-spring/.m2/
 
 # IntelliJ
 .idea/
@@ -12,6 +13,8 @@
 build/
 .gradle/
 out/
+target/
+backend-spring/target/
 
 # Python
 __pycache__/

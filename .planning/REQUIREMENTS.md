@@ -9,33 +9,33 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Tenant Administration
 
-- [ ] **TEN-01**: Super admin can create a tenant workspace with unique tenant identity and metadata.
+- [x] **TEN-01**: Super admin can create a tenant workspace with unique tenant identity and metadata.
 - [ ] **TEN-02**: Super admin can list and view tenant workspaces.
 - [ ] **TEN-03**: Super admin can update tenant workspace metadata and operational status.
 - [ ] **TEN-04**: Tenant-scoped users and roles can be represented as basic operational metadata within a tenant workspace before full authentication and richer RBAC are introduced.
 
 ### Ticket Operations
 
-- [ ] **TICK-01**: Support agent can create a customer inquiry ticket inside a tenant workspace.
-- [ ] **TICK-02**: Support agent can list tickets for a tenant workspace with filtering by status, priority, assignee, and created date.
-- [ ] **TICK-03**: Support agent can view ticket detail including inquiry content, current status, category, priority, assignee, prioritization-related fields, and history.
+- [x] **TICK-01**: Support agent can create a customer inquiry ticket inside a tenant workspace.
+- [x] **TICK-02**: Support agent can list tickets for a tenant workspace with filtering by status, priority, assignee, and created date.
+- [x] **TICK-03**: Support agent can view ticket detail including inquiry content, current status, category, priority, assignee, prioritization-related fields, and history.
 - [ ] **TICK-04**: Support agent can update ticket ownership and operational fields allowed by workflow rules.
-- [ ] **TICK-05**: Every ticket stores the tenant identifier and remains isolated to that tenant.
+- [x] **TICK-05**: Every ticket stores the tenant identifier and remains isolated to that tenant.
 
 ### Ticket Workflow
 
-- [ ] **FLOW-01**: Ticket supports explicit lifecycle states `NEW`, `TRIAGED`, `IN_PROGRESS`, `ANSWERED`, and `CLOSED`.
-- [ ] **FLOW-02**: System rejects invalid ticket state transitions according to defined workflow rules.
+- [x] **FLOW-01**: Ticket supports explicit lifecycle states `NEW`, `TRIAGED`, `IN_PROGRESS`, `ANSWERED`, and `CLOSED`.
+- [x] **FLOW-02**: System rejects invalid ticket state transitions according to defined workflow rules.
 - [ ] **FLOW-03**: System records ticket status transition history with actor and timestamp.
 - [ ] **FLOW-04**: System stores category, urgency, sentiment, priority, and optional simple SLA-risk-supporting fields on tickets where useful for prioritization and reporting.
 - [ ] **FLOW-05**: System does not require a full SLA policy, escalation, notification, or scheduling engine in v1.
 
 ### Tenant Isolation
 
-- [ ] **ISO-01**: Every tenant-scoped resource includes `tenantId`.
-- [ ] **ISO-02**: Every tenant-scoped query is constrained by `tenantId`.
+- [x] **ISO-01**: Every tenant-scoped resource includes `tenantId`.
+- [x] **ISO-02**: Every tenant-scoped query is constrained by `tenantId`.
 - [ ] **ISO-03**: One tenant cannot access another tenant’s tickets, knowledge documents, drafts, logs, history, or metrics.
-- [ ] **ISO-04**: Automated integration tests verify cross-tenant access is denied for reads and writes.
+- [x] **ISO-04**: Automated integration tests verify cross-tenant access is denied for reads and writes.
 
 ### Knowledge Base
 
@@ -76,12 +76,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Quality and Verification
 
-- [ ] **QUAL-01**: Backend APIs are documented through REST-first API documentation suitable for verification and frontend consumption.
-- [ ] **QUAL-02**: Spring backend includes unit tests for core domain and workflow rules.
-- [ ] **QUAL-03**: Spring backend includes integration tests with MongoDB using Testcontainers; Redis-backed integration tests are added only in phases that actually depend on Redis.
+- [x] **QUAL-01**: Backend APIs are documented through REST-first API documentation suitable for verification and frontend consumption.
+- [x] **QUAL-02**: Spring backend includes unit tests for core domain and workflow rules.
+- [x] **QUAL-03**: Spring backend includes integration tests with MongoDB using Testcontainers; Redis-backed integration tests are added only in phases that actually depend on Redis.
 - [ ] **QUAL-04**: Python AI service includes automated tests for classification, retrieval, and draft-generation contracts.
 - [ ] **QUAL-05**: Harnesses verify the behaviors implemented in each phase, including core domain rules, API behavior, tenant isolation, and AI workflow integration where present.
-- [ ] **QUAL-06**: Local development environment is reproducible through Docker Compose.
+- [x] **QUAL-06**: Local development environment is reproducible through Docker Compose.
 
 ## v2 Requirements
 
@@ -149,24 +149,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TEN-01 | Phase 1 | Pending |
+| TEN-01 | Phase 1 | Complete |
 | TEN-02 | Phase 2 | Pending |
 | TEN-03 | Phase 2 | Pending |
 | TEN-04 | Phase 2 | Pending |
-| TICK-01 | Phase 1 | Pending |
-| TICK-02 | Phase 1 | Pending |
-| TICK-03 | Phase 1 | Pending |
+| TICK-01 | Phase 1 | Complete |
+| TICK-02 | Phase 1 | Complete |
+| TICK-03 | Phase 1 | Complete |
 | TICK-04 | Phase 2 | Pending |
-| TICK-05 | Phase 1 | Pending |
-| FLOW-01 | Phase 1 | Pending |
-| FLOW-02 | Phase 1 | Pending |
+| TICK-05 | Phase 1 | Complete |
+| FLOW-01 | Phase 1 | Complete |
+| FLOW-02 | Phase 1 | Complete |
 | FLOW-03 | Phase 2 | Pending |
 | FLOW-04 | Phase 2 | Pending |
 | FLOW-05 | Phase 2 | Pending |
-| ISO-01 | Phase 1 | Pending |
-| ISO-02 | Phase 1 | Pending |
+| ISO-01 | Phase 1 | Complete |
+| ISO-02 | Phase 1 | Complete |
 | ISO-03 | Phase 2 | Pending |
-| ISO-04 | Phase 1 | Pending |
+| ISO-04 | Phase 1 | Complete |
 | KNOW-01 | Phase 3 | Pending |
 | KNOW-02 | Phase 3 | Pending |
 | KNOW-03 | Phase 3 | Pending |
@@ -189,12 +189,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MET-02 | Phase 7 | Pending |
 | MET-03 | Phase 7 | Pending |
 | MET-04 | Phase 7 | Pending |
-| QUAL-01 | Phase 1 | Pending |
-| QUAL-02 | Phase 1 | Pending |
-| QUAL-03 | Phase 1 | Pending |
+| QUAL-01 | Phase 1 | Complete |
+| QUAL-02 | Phase 1 | Complete |
+| QUAL-03 | Phase 1 | Complete |
 | QUAL-04 | Phase 4 | Pending |
 | QUAL-05 | Phase 7 | Pending |
-| QUAL-06 | Phase 1 | Pending |
+| QUAL-06 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 46 total

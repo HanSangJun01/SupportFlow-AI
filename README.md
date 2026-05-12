@@ -21,3 +21,29 @@
 - SDD 기반 기능 명세
 - Codex 기반 AI-assisted 개발
 - Harness 기반 자동 검증
+
+## Backend Foundation Local Development
+
+Start MongoDB:
+
+```bash
+docker compose up -d mongodb
+```
+
+Run the Spring backend:
+
+```bash
+cd backend-spring && ./mvnw spring-boot:run
+```
+
+Run tests:
+
+```bash
+cd backend-spring && ./mvnw test
+cd backend-spring && ./mvnw verify
+```
+
+API documentation:
+
+- OpenAPI JSON: http://localhost:8080/v3/api-docs
+- Swagger UI: http://localhost:8080/swagger-ui.html

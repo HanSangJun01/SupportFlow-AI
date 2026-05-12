@@ -7,6 +7,17 @@ services:
     volumes:
       - mongo-data:/data/db
 
+  backend:
+    build:
+      context: ./backend-spring
+    container_name: supportflow-backend
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/supportflow
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+
   redis:
     image: redis:7
     container_name: supportflow-redis

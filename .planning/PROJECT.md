@@ -12,7 +12,11 @@ Prove a portfolio-grade support operations platform that demonstrates reliable m
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Phase 1 validated controlled tenant workspace creation, list, and detail APIs.
+- [x] Phase 1 validated tenant-scoped ticket create, list, detail, and status transition APIs.
+- [x] Phase 1 validated explicit ticket lifecycle states and invalid transition rejection.
+- [x] Phase 1 validated tenant isolation for ticket read/list/status mutation boundaries.
+- [x] Phase 1 validated REST API documentation, local backend run instructions, and backend verification coverage.
 
 ### Active
 
@@ -82,13 +86,13 @@ The intended v1 proof point is a controlled local environment where a super admi
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Phase 1 is backend-only | The backend domain model, APIs, tenant isolation, and tests need to stabilize before UI work begins. | — Pending |
+| Phase 1 is backend-only | The backend domain model, APIs, tenant isolation, and tests need to stabilize before UI work begins. | Validated in Phase 1 |
 | Manual ticket intake comes first | Early scope should prove core ticket operations before external channels are added. | — Pending |
 | Super admins provision tenants in the MVP | Controlled tenant creation reduces scope and keeps early multi-tenant behavior auditable. | — Pending |
-| Tenant isolation is designed in from the beginning | Retrofitting isolation later would be risky and undermine the platform's core claim. | — Pending |
+| Tenant isolation is designed in from the beginning | Retrofitting isolation later would be risky and undermine the platform's core claim. | Validated for Phase 1 ticket APIs |
 | The backend and AI service remain separate services | Clear boundaries improve architecture quality, operability, and future scaling flexibility. | — Pending |
 | AI output always requires human approval | The product is a support operations system, not an autonomous response engine. | — Pending |
-| The project is specification-first and verification-driven | Portfolio value depends on defensible architecture, test evidence, and traceable delivery. | — Pending |
+| The project is specification-first and verification-driven | Portfolio value depends on defensible architecture, test evidence, and traceable delivery. | Validated in Phase 1 |
 | v1 proves the end-to-end workflow, not full SaaS completeness | Focus is needed to validate the core operational and AI-assisted support loop. | — Pending |
 
 ## Evolution
@@ -109,4 +113,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-07 after initialization*
+*Last updated: 2026-05-11 after Phase 1 verification*
