@@ -86,7 +86,7 @@ Plans:
 - [x] 02-01: Implement tenant administration read/update workflows and tenant-scoped operational metadata
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 02-02: Add ticket ownership, prioritization fields, and immutable workflow history
+- [x] 02-02: Add ticket ownership, prioritization fields, and immutable workflow history
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 02-03: Expand integration coverage for workflow and tenant isolation rules
@@ -204,7 +204,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Backend Foundation | 4/4 | Complete | 2026-05-11 |
-| 2. Tenant Workflow Core | 1/3 | In Progress | - |
+| 2. Tenant Workflow Core | 2/3 | In Progress | - |
 | 3. Knowledge Base Core | 0/2 | Not started | - |
 | 4. AI Classification Integration | 0/3 | Not started | - |
 | 5. Evidence Retrieval | 0/3 | Not started | - |

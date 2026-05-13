@@ -19,16 +19,16 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **TICK-01**: Support agent can create a customer inquiry ticket inside a tenant workspace.
 - [x] **TICK-02**: Support agent can list tickets for a tenant workspace with filtering by status, priority, assignee, and created date.
 - [x] **TICK-03**: Support agent can view ticket detail including inquiry content, current status, category, priority, assignee, prioritization-related fields, and history.
-- [ ] **TICK-04**: Support agent can update ticket ownership and operational fields allowed by workflow rules.
+- [x] **TICK-04**: Support agent can update ticket ownership and operational fields allowed by workflow rules.
 - [x] **TICK-05**: Every ticket stores the tenant identifier and remains isolated to that tenant.
 
 ### Ticket Workflow
 
 - [x] **FLOW-01**: Ticket supports explicit lifecycle states `NEW`, `TRIAGED`, `IN_PROGRESS`, `ANSWERED`, and `CLOSED`.
 - [x] **FLOW-02**: System rejects invalid ticket state transitions according to defined workflow rules.
-- [ ] **FLOW-03**: System records ticket status transition history with actor and timestamp.
-- [ ] **FLOW-04**: System stores category, urgency, sentiment, priority, and optional simple SLA-risk-supporting fields on tickets where useful for prioritization and reporting.
-- [ ] **FLOW-05**: System does not require a full SLA policy, escalation, notification, or scheduling engine in v1.
+- [x] **FLOW-03**: System records ticket status transition history with actor and timestamp.
+- [x] **FLOW-04**: System stores category, urgency, sentiment, priority, and optional simple SLA-risk-supporting fields on tickets where useful for prioritization and reporting.
+- [x] **FLOW-05**: System does not require a full SLA policy, escalation, notification, or scheduling engine in v1.
 
 ### Tenant Isolation
 
@@ -156,13 +156,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TICK-01 | Phase 1 | Complete |
 | TICK-02 | Phase 1 | Complete |
 | TICK-03 | Phase 1 | Complete |
-| TICK-04 | Phase 2 | Pending |
+| TICK-04 | Phase 2 | Complete |
 | TICK-05 | Phase 1 | Complete |
 | FLOW-01 | Phase 1 | Complete |
 | FLOW-02 | Phase 1 | Complete |
-| FLOW-03 | Phase 2 | Pending |
-| FLOW-04 | Phase 2 | Pending |
-| FLOW-05 | Phase 2 | Pending |
+| FLOW-03 | Phase 2 | Complete |
+| FLOW-04 | Phase 2 | Complete |
+| FLOW-05 | Phase 2 | Complete |
 | ISO-01 | Phase 1 | Complete |
 | ISO-02 | Phase 1 | Complete |
 | ISO-03 | Phase 2 | Complete |
@@ -203,4 +203,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-05-07*
-*Last updated: 2026-05-13 after Phase 2 Plan 02-01 execution*
+*Last updated: 2026-05-13 after Phase 2 Plan 02-02 execution*
