@@ -10,9 +10,9 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Tenant Administration
 
 - [x] **TEN-01**: Super admin can create a tenant workspace with unique tenant identity and metadata.
-- [ ] **TEN-02**: Super admin can list and view tenant workspaces.
-- [ ] **TEN-03**: Super admin can update tenant workspace metadata and operational status.
-- [ ] **TEN-04**: Tenant-scoped users and roles can be represented as basic operational metadata within a tenant workspace before full authentication and richer RBAC are introduced.
+- [x] **TEN-02**: Super admin can list and view tenant workspaces.
+- [x] **TEN-03**: Super admin can update tenant workspace metadata and operational status.
+- [x] **TEN-04**: Tenant-scoped users and roles can be represented as basic operational metadata within a tenant workspace before full authentication and richer RBAC are introduced.
 
 ### Ticket Operations
 
@@ -34,7 +34,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **ISO-01**: Every tenant-scoped resource includes `tenantId`.
 - [x] **ISO-02**: Every tenant-scoped query is constrained by `tenantId`.
-- [ ] **ISO-03**: One tenant cannot access another tenant’s tickets, knowledge documents, drafts, logs, history, or metrics.
+- [x] **ISO-03**: One tenant cannot access another tenant’s tickets, knowledge documents, drafts, logs, history, or metrics.
 - [x] **ISO-04**: Automated integration tests verify cross-tenant access is denied for reads and writes.
 
 ### Knowledge Base
@@ -150,9 +150,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | TEN-01 | Phase 1 | Complete |
-| TEN-02 | Phase 2 | Pending |
-| TEN-03 | Phase 2 | Pending |
-| TEN-04 | Phase 2 | Pending |
+| TEN-02 | Phase 2 | Complete |
+| TEN-03 | Phase 2 | Complete |
+| TEN-04 | Phase 2 | Complete |
 | TICK-01 | Phase 1 | Complete |
 | TICK-02 | Phase 1 | Complete |
 | TICK-03 | Phase 1 | Complete |
@@ -165,7 +165,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FLOW-05 | Phase 2 | Pending |
 | ISO-01 | Phase 1 | Complete |
 | ISO-02 | Phase 1 | Complete |
-| ISO-03 | Phase 2 | Pending |
+| ISO-03 | Phase 2 | Complete |
 | ISO-04 | Phase 1 | Complete |
 | KNOW-01 | Phase 3 | Pending |
 | KNOW-02 | Phase 3 | Pending |
@@ -203,4 +203,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-05-07*
-*Last updated: 2026-05-07 after initialization*
+*Last updated: 2026-05-13 after Phase 2 Plan 02-01 execution*

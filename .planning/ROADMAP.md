@@ -49,7 +49,7 @@ super-admin tenant provisioning
   3. Invalid ticket lifecycle transitions are rejected by backend rules.
   4. Automated tests prove tenant-scoped queries and cross-tenant denial for implemented foundation APIs.
 **Plans**: 4 plans
-**Planning Status**: Ready to execute (planned 2026-05-08)
+**Planning Status**: In progress (02-01 completed 2026-05-13)
 
 Plans:
 **Wave 1**
@@ -83,7 +83,7 @@ Cross-cutting constraints:
 
 Plans:
 **Wave 1**
-- [ ] 02-01: Implement tenant administration read/update workflows and tenant-scoped operational metadata
+- [x] 02-01: Implement tenant administration read/update workflows and tenant-scoped operational metadata
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 02-02: Add ticket ownership, prioritization fields, and immutable workflow history
@@ -204,7 +204,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Backend Foundation | 4/4 | Complete | 2026-05-11 |
-| 2. Tenant Workflow Core | 0/3 | Not started | - |
+| 2. Tenant Workflow Core | 1/3 | In Progress | - |
 | 3. Knowledge Base Core | 0/2 | Not started | - |
 | 4. AI Classification Integration | 0/3 | Not started | - |
 | 5. Evidence Retrieval | 0/3 | Not started | - |
