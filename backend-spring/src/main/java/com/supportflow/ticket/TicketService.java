@@ -28,7 +28,7 @@ public class TicketService {
     }
 
     public Ticket createTicket(String tenantId, CreateTicketCommand command) {
-        tenantService.getTenant(tenantId);
+        tenantService.requireActiveTenant(tenantId);
         Instant now = Instant.now();
         Ticket ticket = new Ticket();
         ticket.setTenantId(tenantId);
