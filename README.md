@@ -47,3 +47,11 @@ API documentation:
 
 - OpenAPI JSON: http://localhost:8080/v3/api-docs
 - Swagger UI: http://localhost:8080/swagger-ui.html
+- Phase 1 backend contract: `docs/sdd/phase-01-backend-foundation-api.md`
+- Phase 2 tenant workflow contract: `docs/sdd/phase-02-tenant-workflow-core-api.md`
+
+Phase 2 verification:
+
+```bash
+cd backend-spring && ./mvnw verify
+```
