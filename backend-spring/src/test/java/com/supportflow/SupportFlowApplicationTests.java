@@ -2,6 +2,7 @@ package com.supportflow;
 
 import com.supportflow.tenant.TenantService;
 import com.supportflow.ticket.TicketService;
+import com.supportflow.user.OperationalUserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -18,6 +19,9 @@ class SupportFlowApplicationTests {
 
     @MockitoBean
     private TicketService ticketService;
+
+    @MockitoBean
+    private OperationalUserService operationalUserService;
 
     @Test
     void contextLoads() {
