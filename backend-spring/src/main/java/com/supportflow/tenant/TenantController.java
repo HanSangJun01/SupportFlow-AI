@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,10 +49,27 @@ public class TenantController {
         return TenantResponse.from(tenantService.getTenant(tenantId));
     }
 
+    @PatchMapping("/{tenantId}")
+    @Operation(summary = "Update tenant workspace metadata")
+    public TenantResponse updateTenant(@PathVariable String tenantId, @RequestBody UpdateTenantRequest request) {
+        return TenantResponse.from(tenantService.updateTenant(tenantId, new TenantService.UpdateTenantCommand(
+                request.name(),
+                request.description(),
+                request.status()
+        )));
+    }
+
     public record CreateTenantRequest(
             @NotBlank String name,
             @NotBlank String slug,
             String description
+    ) {
+    }
+
+    public record UpdateTenantRequest(
+            String name,
+            String description,
+            TenantStatus status
     ) {
     }
 

@@ -1,9 +1,12 @@
 package com.supportflow.tenant;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -11,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.supportflow.common.GlobalExceptionHandler;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +86,44 @@ class TenantApiIntegrationTest {
                                 """))
                 .andExpect(status().isConflict())
                 .andExpect(content().string(containsString("Tenant slug already exists")));
+    }
+
+    @Test
+    void updateTenantReturnsUpdatedMetadataAndStatus() throws Exception {
+        Tenant tenant = tenant("tenant-1", "Acme Operations", "acme");
+        tenant.setDescription("Internal support");
+        tenant.setStatus(TenantStatus.INACTIVE);
+        tenant.setUpdatedAt(Instant.parse("2026-05-12T00:00:00Z"));
+        when(tenantService.updateTenant(anyString(), org.mockito.ArgumentMatchers.any()))
+                .thenReturn(tenant);
+
+        mockMvc.perform(patch("/api/v1/tenants/{tenantId}", "tenant-1")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "name": "Acme Operations",
+                                  "description": "Internal support",
+                                  "status": "INACTIVE"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Acme Operations"))
+                .andExpect(jsonPath("$.description").value("Internal support"))
+                .andExpect(jsonPath("$.status").value("INACTIVE"))
+                .andExpect(jsonPath("$.slug").value("acme"));
+
+        verify(tenantService).updateTenant("tenant-1", new TenantService.UpdateTenantCommand(
+                "Acme Operations",
+                "Internal support",
+                TenantStatus.INACTIVE
+        ));
+    }
+
+    @Test
+    void updateTenantRequestDoesNotExposeSlug() {
+        assertThat(Arrays.asList(TenantController.UpdateTenantRequest.class.getRecordComponents()))
+                .extracting(component -> component.getName())
+                .doesNotContain("slug");
     }
 
     private Tenant tenant(String id, String name, String slug) {
