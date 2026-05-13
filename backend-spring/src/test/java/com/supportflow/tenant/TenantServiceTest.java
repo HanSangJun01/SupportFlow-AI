@@ -72,6 +72,23 @@ class TenantServiceTest {
     }
 
     @Test
+    void updateTenantRejectsBlankName() {
+        Tenant tenant = tenant();
+        when(tenantRepository.findById("tenant-1")).thenReturn(Optional.of(tenant));
+
+        assertThatThrownBy(() -> tenantService.updateTenant("tenant-1", new TenantService.UpdateTenantCommand(
+                "   ",
+                null,
+                null
+        )))
+                .isInstanceOfSatisfying(ResponseStatusException.class, exception ->
+                        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST))
+                .hasMessageContaining("Tenant name must not be blank");
+
+        verify(tenantRepository, never()).save(any(Tenant.class));
+    }
+
+    @Test
     void requireActiveTenantRejectsInactiveTenant() {
         Tenant tenant = tenant();
         tenant.setStatus(TenantStatus.INACTIVE);

@@ -2,6 +2,7 @@ package com.supportflow.ticket;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,6 +36,51 @@ class TicketServiceTest {
 
     @InjectMocks
     private TicketService ticketService;
+
+    @Test
+    void createTicketValidatesNonNullAssigneeBeforeSaving() {
+        String tenantId = "tenant-1";
+        Ticket commandBackedTicket = ticket("ticket-1", tenantId, TicketStatus.NEW, TicketPriority.HIGH, "agent-7",
+                "2026-05-11T12:00:00Z");
+        when(ticketRepository.save(any(Ticket.class))).thenReturn(commandBackedTicket);
+
+        Ticket created = ticketService.createTicket(tenantId, new TicketService.CreateTicketCommand(
+                "Cannot log in",
+                "Ada Lovelace",
+                "ada@example.com",
+                "Login fails after reset",
+                "billing",
+                TicketPriority.HIGH,
+                "agent-7"
+        ));
+
+        assertThat(created.getAssigneeId()).isEqualTo("agent-7");
+        verify(tenantService).requireActiveTenant(tenantId);
+        verify(operationalUserService).validateActiveSupportAgent(tenantId, "agent-7");
+        verify(ticketRepository).save(any(Ticket.class));
+    }
+
+    @Test
+    void createTicketRejectsInvalidAssigneeBeforeSaving() {
+        String tenantId = "tenant-1";
+        when(operationalUserService.validateActiveSupportAgent(tenantId, "agent-7"))
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Operational user not found"));
+
+        assertThatThrownBy(() -> ticketService.createTicket(tenantId, new TicketService.CreateTicketCommand(
+                "Cannot log in",
+                "Ada Lovelace",
+                "ada@example.com",
+                "Login fails after reset",
+                "billing",
+                TicketPriority.HIGH,
+                "agent-7"
+        )))
+                .isInstanceOfSatisfying(ResponseStatusException.class, exception ->
+                        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND));
+
+        verify(tenantService).requireActiveTenant(tenantId);
+        verify(ticketRepository, never()).save(any(Ticket.class));
+    }
 
     @Test
     void listTicketsAppliesStatusPriorityAssigneeAndCreatedDateFilters() {

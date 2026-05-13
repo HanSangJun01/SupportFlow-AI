@@ -43,6 +43,9 @@ public class TenantService {
     public Tenant updateTenant(String tenantId, UpdateTenantCommand command) {
         Tenant tenant = getTenant(tenantId);
         if (command.name() != null) {
+            if (command.name().isBlank()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tenant name must not be blank");
+            }
             tenant.setName(command.name());
         }
         if (command.description() != null) {

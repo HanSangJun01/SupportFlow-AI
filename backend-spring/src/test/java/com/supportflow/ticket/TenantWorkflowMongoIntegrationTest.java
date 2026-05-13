@@ -106,6 +106,48 @@ class TenantWorkflowMongoIntegrationTest {
     }
 
     @Test
+    void ticketCreationValidatesTenantLocalSupportAgentAssignee() {
+        TenantResponse tenantA = createTenant("Create Tenant A", "create-tenant-a");
+        TenantResponse tenantB = createTenant("Create Tenant B", "create-tenant-b");
+        OperationalUserResponse sameTenantAgent = createUser(tenantA.id(), "Tenant A Agent",
+                "create-agent@tenant-a.example", OperationalUserRole.SUPPORT_AGENT);
+        OperationalUserResponse crossTenantAgent = createUser(tenantB.id(), "Tenant B Agent",
+                "create-agent@tenant-b.example", OperationalUserRole.SUPPORT_AGENT);
+        OperationalUserResponse tenantAdmin = createUser(tenantA.id(), "Tenant A Admin",
+                "create-admin@tenant-a.example", OperationalUserRole.TENANT_ADMIN);
+        OperationalUserResponse inactiveAgent = createUser(tenantA.id(), "Inactive Create Agent",
+                "inactive-create@tenant-a.example", OperationalUserRole.SUPPORT_AGENT);
+        updateUserStatus(tenantA.id(), inactiveAgent.id(), OperationalUserStatus.INACTIVE);
+
+        ResponseEntity<TicketResponse> validResponse = restTemplate.postForEntity(
+                url("/api/v1/tenants/" + tenantA.id() + "/tickets"),
+                new TicketCreateRequest("Assigned issue", "Ada Lovelace", "ada@example.com", "Cannot log in",
+                        null, null, sameTenantAgent.id()),
+                TicketResponse.class);
+        ResponseEntity<TicketResponse> crossTenantResponse = restTemplate.postForEntity(
+                url("/api/v1/tenants/" + tenantA.id() + "/tickets"),
+                new TicketCreateRequest("Cross tenant issue", "Grace Hopper", "grace@example.com", "Cannot submit",
+                        null, null, crossTenantAgent.id()),
+                TicketResponse.class);
+        ResponseEntity<TicketResponse> wrongRoleResponse = restTemplate.postForEntity(
+                url("/api/v1/tenants/" + tenantA.id() + "/tickets"),
+                new TicketCreateRequest("Wrong role issue", "Katherine Johnson", "katherine@example.com",
+                        "Cannot export", null, null, tenantAdmin.id()),
+                TicketResponse.class);
+        ResponseEntity<TicketResponse> inactiveResponse = restTemplate.postForEntity(
+                url("/api/v1/tenants/" + tenantA.id() + "/tickets"),
+                new TicketCreateRequest("Inactive assignee issue", "Dorothy Vaughan", "dorothy@example.com",
+                        "Cannot upload", null, null, inactiveAgent.id()),
+                TicketResponse.class);
+
+        assertThat(validResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(validResponse.getBody().assigneeId()).isEqualTo(sameTenantAgent.id());
+        assertThat(crossTenantResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(wrongRoleResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(inactiveResponse.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+    }
+
+    @Test
     void crossTenantActorFailsStatusAndWorkflowUpdatesWithoutMutation() {
         TenantResponse tenantA = createTenant("Actor Tenant A", "actor-tenant-a");
         TenantResponse tenantB = createTenant("Actor Tenant B", "actor-tenant-b");
