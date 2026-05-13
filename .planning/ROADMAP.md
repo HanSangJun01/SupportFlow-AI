@@ -82,8 +82,13 @@ Cross-cutting constraints:
 **Plans**: 3 plans
 
 Plans:
+**Wave 1**
 - [ ] 02-01: Implement tenant administration read/update workflows and tenant-scoped operational metadata
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 02-02: Add ticket ownership, prioritization fields, and immutable workflow history
+
+**Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 02-03: Expand integration coverage for workflow and tenant isolation rules
 
 ### Phase 3: Knowledge Base Core
