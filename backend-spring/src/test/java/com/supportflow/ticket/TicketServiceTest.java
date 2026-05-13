@@ -5,6 +5,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.supportflow.tenant.TenantService;
+import com.supportflow.user.OperationalUserService;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,9 @@ class TicketServiceTest {
 
     @Mock
     private TenantService tenantService;
+
+    @Mock
+    private OperationalUserService operationalUserService;
 
     @Mock
     private TicketStatusTransitionPolicy transitionPolicy;
@@ -57,6 +61,34 @@ class TicketServiceTest {
         assertThat(tickets).extracting(Ticket::getId).containsExactly("match");
         verify(tenantService).getTenant(tenantId);
         verify(ticketRepository).findByTenantId(tenantId);
+    }
+
+    @Test
+    void updateStatusRequiresActiveActorAndAppendsStatusHistory() {
+        String tenantId = "tenant-1";
+        String ticketId = "ticket-1";
+        Ticket ticket = ticket(ticketId, tenantId, TicketStatus.NEW, TicketPriority.HIGH, "agent-7",
+                "2026-05-11T12:00:00Z");
+        when(ticketRepository.findByTenantIdAndId(tenantId, ticketId)).thenReturn(java.util.Optional.of(ticket));
+        when(ticketRepository.save(ticket)).thenReturn(ticket);
+
+        Ticket updated = ticketService.updateStatus(tenantId, ticketId, TicketStatus.TRIAGED, "actor-1");
+
+        assertThat(updated.getStatus()).isEqualTo(TicketStatus.TRIAGED);
+        assertThat(updated.getHistory()).hasSize(1);
+        TicketHistoryEntry entry = updated.getHistory().getFirst();
+        assertThat(entry.getEventType()).isEqualTo(TicketHistoryEventType.STATUS_CHANGED);
+        assertThat(entry.getActorUserId()).isEqualTo("actor-1");
+        assertThat(entry.getChanges()).singleElement()
+                .satisfies(change -> {
+                    assertThat(change.getField()).isEqualTo("status");
+                    assertThat(change.getOldValue()).isEqualTo("NEW");
+                    assertThat(change.getNewValue()).isEqualTo("TRIAGED");
+                });
+        verify(tenantService).requireActiveTenant(tenantId);
+        verify(tenantService).getTenant(tenantId);
+        verify(operationalUserService).validateActiveActor(tenantId, "actor-1");
+        verify(transitionPolicy).validateTransition(TicketStatus.NEW, TicketStatus.TRIAGED);
     }
 
     private Ticket ticket(String id, String tenantId, TicketStatus status, TicketPriority priority, String assigneeId,

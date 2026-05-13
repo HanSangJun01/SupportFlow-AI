@@ -1,6 +1,8 @@
 package com.supportflow.ticket;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -24,6 +26,7 @@ public class Ticket {
     private String assigneeId;
     private Instant createdAt;
     private Instant updatedAt;
+    private List<TicketHistoryEntry> history = new ArrayList<>();
 
     public String getId() {
         return id;
@@ -119,5 +122,16 @@ public class Ticket {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public List<TicketHistoryEntry> getHistory() {
+        if (history == null) {
+            history = new ArrayList<>();
+        }
+        return history;
+    }
+
+    public void setHistory(List<TicketHistoryEntry> history) {
+        this.history = history == null ? new ArrayList<>() : new ArrayList<>(history);
     }
 }

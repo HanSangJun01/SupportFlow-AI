@@ -1,6 +1,7 @@
 package com.supportflow.ticket;
 
 import com.supportflow.tenant.TenantService;
+import com.supportflow.user.OperationalUserService;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -14,12 +15,14 @@ public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final TenantService tenantService;
+    private final OperationalUserService operationalUserService;
     private final TicketStatusTransitionPolicy transitionPolicy;
 
     public TicketService(TicketRepository ticketRepository, TenantService tenantService,
-            TicketStatusTransitionPolicy transitionPolicy) {
+            OperationalUserService operationalUserService, TicketStatusTransitionPolicy transitionPolicy) {
         this.ticketRepository = ticketRepository;
         this.tenantService = tenantService;
+        this.operationalUserService = operationalUserService;
         this.transitionPolicy = transitionPolicy;
     }
 
@@ -60,11 +63,21 @@ public class TicketService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
     }
 
-    public Ticket updateStatus(String tenantId, String ticketId, TicketStatus status) {
+    public Ticket updateStatus(String tenantId, String ticketId, TicketStatus status, String actorUserId) {
+        tenantService.requireActiveTenant(tenantId);
         Ticket ticket = getTicket(tenantId, ticketId);
+        operationalUserService.validateActiveActor(tenantId, actorUserId);
+        TicketStatus previousStatus = ticket.getStatus();
         transitionPolicy.validateTransition(ticket.getStatus(), status);
         ticket.setStatus(status);
-        ticket.setUpdatedAt(Instant.now());
+        Instant now = Instant.now();
+        ticket.setUpdatedAt(now);
+        ticket.getHistory().add(new TicketHistoryEntry(
+                TicketHistoryEventType.STATUS_CHANGED,
+                actorUserId,
+                now,
+                List.of(new TicketFieldChange("status", previousStatus.name(), status.name()))
+        ));
         return ticketRepository.save(ticket);
     }
 

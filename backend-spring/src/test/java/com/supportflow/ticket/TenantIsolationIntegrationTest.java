@@ -34,7 +34,7 @@ class TenantIsolationIntegrationTest {
         when(ticketService.getTicket(tenantA, ticketA)).thenReturn(ticket(ticketA, tenantA, TicketStatus.NEW));
         when(ticketService.getTicket(tenantB, ticketA))
                 .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
-        when(ticketService.updateStatus(tenantB, ticketA, TicketStatus.TRIAGED))
+        when(ticketService.updateStatus(tenantB, ticketA, TicketStatus.TRIAGED, "actor-b"))
                 .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
         when(ticketService.listTickets(tenantB, new TicketService.TicketFilters(null, null, null, null, null)))
                 .thenReturn(List.of());
@@ -49,7 +49,7 @@ class TenantIsolationIntegrationTest {
         mockMvc.perform(patch("/api/v1/tenants/{tenantId}/tickets/{ticketId}/status", tenantB, ticketA)
                         .contentType("application/json")
                         .content("""
-                                { "status": "TRIAGED" }
+                                { "status": "TRIAGED", "actorUserId": "actor-b" }
                                 """))
                 .andExpect(status().isNotFound());
 

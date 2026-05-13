@@ -80,27 +80,35 @@ class TicketApiIntegrationTest {
 
     @Test
     void updateStatusReturnsUpdatedTicket() throws Exception {
-        when(ticketService.updateStatus("tenant-1", "ticket-1", TicketStatus.TRIAGED))
-                .thenReturn(ticket("ticket-1", "tenant-1", TicketStatus.TRIAGED));
+        Ticket ticket = ticket("ticket-1", "tenant-1", TicketStatus.TRIAGED);
+        ticket.getHistory().add(new TicketHistoryEntry(
+                TicketHistoryEventType.STATUS_CHANGED,
+                "actor-1",
+                Instant.parse("2026-05-11T01:00:00Z"),
+                List.of(new TicketFieldChange("status", "NEW", "TRIAGED"))
+        ));
+        when(ticketService.updateStatus("tenant-1", "ticket-1", TicketStatus.TRIAGED, "actor-1"))
+                .thenReturn(ticket);
 
         mockMvc.perform(patch("/api/v1/tenants/tenant-1/tickets/ticket-1/status")
                         .contentType("application/json")
                         .content("""
-                                { "status": "TRIAGED" }
+                                { "status": "TRIAGED", "actorUserId": "actor-1" }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("TRIAGED"));
+                .andExpect(jsonPath("$.status").value("TRIAGED"))
+                .andExpect(jsonPath("$.history[0].eventType").value("STATUS_CHANGED"));
     }
 
     @Test
     void invalidStatusTransitionReturns400() throws Exception {
-        when(ticketService.updateStatus("tenant-1", "ticket-1", TicketStatus.CLOSED))
+        when(ticketService.updateStatus("tenant-1", "ticket-1", TicketStatus.CLOSED, "actor-1"))
                 .thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ticket status transition"));
 
         mockMvc.perform(patch("/api/v1/tenants/tenant-1/tickets/ticket-1/status")
                         .contentType("application/json")
                         .content("""
-                                { "status": "CLOSED" }
+                                { "status": "CLOSED", "actorUserId": "actor-1" }
                                 """))
                 .andExpect(status().isBadRequest());
     }
