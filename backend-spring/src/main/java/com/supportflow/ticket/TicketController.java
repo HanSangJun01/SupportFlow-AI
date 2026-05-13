@@ -78,6 +78,19 @@ public class TicketController {
         return TicketResponse.from(ticketService.updateStatus(tenantId, ticketId, request.status(), request.actorUserId()));
     }
 
+    @PatchMapping("/{ticketId}/workflow")
+    @Operation(summary = "Update tenant-scoped ticket workflow metadata")
+    public TicketResponse updateWorkflow(@PathVariable String tenantId, @PathVariable String ticketId,
+            @Valid @RequestBody UpdateTicketWorkflowRequest request) {
+        return TicketResponse.from(ticketService.updateWorkflowMetadata(tenantId, ticketId,
+                new TicketService.UpdateWorkflowMetadataCommand(
+                        request.actorUserId(),
+                        request.assigneeId(),
+                        request.priority(),
+                        request.category()
+                )));
+    }
+
     public record CreateTicketRequest(
             @NotBlank String subject,
             @NotBlank String customerName,
@@ -92,6 +105,14 @@ public class TicketController {
     public record UpdateTicketStatusRequest(
             @NotNull TicketStatus status,
             @NotBlank String actorUserId
+    ) {
+    }
+
+    public record UpdateTicketWorkflowRequest(
+            @NotBlank String actorUserId,
+            String assigneeId,
+            TicketPriority priority,
+            String category
     ) {
     }
 

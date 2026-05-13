@@ -1,6 +1,8 @@
 package com.supportflow.ticket;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -13,6 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
 class TicketServiceTest {
@@ -89,6 +93,75 @@ class TicketServiceTest {
         verify(tenantService).getTenant(tenantId);
         verify(operationalUserService).validateActiveActor(tenantId, "actor-1");
         verify(transitionPolicy).validateTransition(TicketStatus.NEW, TicketStatus.TRIAGED);
+    }
+
+    @Test
+    void updateWorkflowMetadataValidatesActorAndAssigneeThenAppendsChangedFields() {
+        String tenantId = "tenant-1";
+        String ticketId = "ticket-1";
+        Ticket ticket = ticket(ticketId, tenantId, TicketStatus.TRIAGED, TicketPriority.NORMAL, "agent-7",
+                "2026-05-11T12:00:00Z");
+        ticket.setCategory("billing");
+        when(ticketRepository.findByTenantIdAndId(tenantId, ticketId)).thenReturn(java.util.Optional.of(ticket));
+        when(ticketRepository.save(ticket)).thenReturn(ticket);
+
+        Ticket updated = ticketService.updateWorkflowMetadata(tenantId, ticketId,
+                new TicketService.UpdateWorkflowMetadataCommand("actor-1", "agent-8", TicketPriority.HIGH,
+                        "technical"));
+
+        assertThat(updated.getAssigneeId()).isEqualTo("agent-8");
+        assertThat(updated.getPriority()).isEqualTo(TicketPriority.HIGH);
+        assertThat(updated.getCategory()).isEqualTo("technical");
+        assertThat(updated.getHistory()).hasSize(1);
+        TicketHistoryEntry entry = updated.getHistory().getFirst();
+        assertThat(entry.getEventType()).isEqualTo(TicketHistoryEventType.WORKFLOW_METADATA_CHANGED);
+        assertThat(entry.getActorUserId()).isEqualTo("actor-1");
+        assertThat(entry.getChanges()).extracting(TicketFieldChange::getField)
+                .containsExactly("assigneeId", "priority", "category");
+        assertThat(entry.getChanges()).extracting(TicketFieldChange::getOldValue)
+                .containsExactly("agent-7", "NORMAL", "billing");
+        assertThat(entry.getChanges()).extracting(TicketFieldChange::getNewValue)
+                .containsExactly("agent-8", "HIGH", "technical");
+        verify(tenantService).requireActiveTenant(tenantId);
+        verify(operationalUserService).validateActiveActor(tenantId, "actor-1");
+        verify(operationalUserService).validateActiveSupportAgent(tenantId, "agent-8");
+    }
+
+    @Test
+    void updateWorkflowMetadataRejectsClosedTickets() {
+        String tenantId = "tenant-1";
+        String ticketId = "ticket-1";
+        Ticket ticket = ticket(ticketId, tenantId, TicketStatus.CLOSED, TicketPriority.NORMAL, "agent-7",
+                "2026-05-11T12:00:00Z");
+        when(ticketRepository.findByTenantIdAndId(tenantId, ticketId)).thenReturn(java.util.Optional.of(ticket));
+
+        assertThatThrownBy(() -> ticketService.updateWorkflowMetadata(tenantId, ticketId,
+                new TicketService.UpdateWorkflowMetadataCommand("actor-1", "agent-8", TicketPriority.HIGH,
+                        "technical")))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(exception -> ((ResponseStatusException) exception).getStatusCode())
+                .isEqualTo(HttpStatus.BAD_REQUEST);
+        verify(operationalUserService, never()).validateActiveActor(tenantId, "actor-1");
+        verify(ticketRepository, never()).save(ticket);
+    }
+
+    @Test
+    void updateWorkflowMetadataDoesNotAppendHistoryWhenValuesMatch() {
+        String tenantId = "tenant-1";
+        String ticketId = "ticket-1";
+        Ticket ticket = ticket(ticketId, tenantId, TicketStatus.TRIAGED, TicketPriority.NORMAL, "agent-7",
+                "2026-05-11T12:00:00Z");
+        ticket.setCategory("billing");
+        when(ticketRepository.findByTenantIdAndId(tenantId, ticketId)).thenReturn(java.util.Optional.of(ticket));
+
+        Ticket updated = ticketService.updateWorkflowMetadata(tenantId, ticketId,
+                new TicketService.UpdateWorkflowMetadataCommand("actor-1", "agent-7", TicketPriority.NORMAL,
+                        "billing"));
+
+        assertThat(updated.getHistory()).isEmpty();
+        verify(operationalUserService).validateActiveActor(tenantId, "actor-1");
+        verify(operationalUserService).validateActiveSupportAgent(tenantId, "agent-7");
+        verify(ticketRepository, never()).save(ticket);
     }
 
     private Ticket ticket(String id, String tenantId, TicketStatus status, TicketPriority priority, String assigneeId,

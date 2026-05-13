@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -81,6 +82,50 @@ public class TicketService {
         return ticketRepository.save(ticket);
     }
 
+    public Ticket updateWorkflowMetadata(String tenantId, String ticketId, UpdateWorkflowMetadataCommand command) {
+        tenantService.requireActiveTenant(tenantId);
+        Ticket ticket = getTicket(tenantId, ticketId);
+        if (ticket.getStatus() == TicketStatus.CLOSED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Closed tickets cannot be edited");
+        }
+        operationalUserService.validateActiveActor(tenantId, command.actorUserId());
+        if (command.assigneeId() != null) {
+            operationalUserService.validateActiveSupportAgent(tenantId, command.assigneeId());
+        }
+
+        List<TicketFieldChange> changes = new ArrayList<>();
+        if (command.assigneeId() != null && !Objects.equals(ticket.getAssigneeId(), command.assigneeId())) {
+            changes.add(new TicketFieldChange("assigneeId", ticket.getAssigneeId(), command.assigneeId()));
+            ticket.setAssigneeId(command.assigneeId());
+        }
+        if (command.priority() != null && ticket.getPriority() != command.priority()) {
+            changes.add(new TicketFieldChange("priority", enumValue(ticket.getPriority()), enumValue(command.priority())));
+            ticket.setPriority(command.priority());
+        }
+        if (command.category() != null && !Objects.equals(ticket.getCategory(), command.category())) {
+            changes.add(new TicketFieldChange("category", ticket.getCategory(), command.category()));
+            ticket.setCategory(command.category());
+        }
+
+        if (changes.isEmpty()) {
+            return ticket;
+        }
+
+        Instant now = Instant.now();
+        ticket.setUpdatedAt(now);
+        ticket.getHistory().add(new TicketHistoryEntry(
+                TicketHistoryEventType.WORKFLOW_METADATA_CHANGED,
+                command.actorUserId(),
+                now,
+                changes
+        ));
+        return ticketRepository.save(ticket);
+    }
+
+    private String enumValue(Enum<?> value) {
+        return value == null ? null : value.name();
+    }
+
     public record CreateTicketCommand(
             String subject,
             String customerName,
@@ -98,6 +143,14 @@ public class TicketService {
             String assigneeId,
             Instant createdFrom,
             Instant createdTo
+    ) {
+    }
+
+    public record UpdateWorkflowMetadataCommand(
+            String actorUserId,
+            String assigneeId,
+            TicketPriority priority,
+            String category
     ) {
     }
 }

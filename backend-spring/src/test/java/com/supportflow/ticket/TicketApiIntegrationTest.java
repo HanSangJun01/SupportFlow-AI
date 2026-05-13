@@ -113,6 +113,53 @@ class TicketApiIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void updateWorkflowReturnsUpdatedTicketAndHistory() throws Exception {
+        Ticket ticket = ticket("ticket-1", "tenant-1", TicketStatus.TRIAGED);
+        ticket.setPriority(TicketPriority.URGENT);
+        ticket.setAssigneeId("agent-8");
+        ticket.setCategory("technical");
+        ticket.getHistory().add(new TicketHistoryEntry(
+                TicketHistoryEventType.WORKFLOW_METADATA_CHANGED,
+                "actor-1",
+                Instant.parse("2026-05-11T01:00:00Z"),
+                List.of(
+                        new TicketFieldChange("assigneeId", "agent-7", "agent-8"),
+                        new TicketFieldChange("priority", "HIGH", "URGENT"),
+                        new TicketFieldChange("category", null, "technical")
+                )
+        ));
+        when(ticketService.updateWorkflowMetadata(eq("tenant-1"), eq("ticket-1"),
+                any(TicketService.UpdateWorkflowMetadataCommand.class))).thenReturn(ticket);
+
+        mockMvc.perform(patch("/api/v1/tenants/tenant-1/tickets/ticket-1/workflow")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "actorUserId": "actor-1",
+                                  "assigneeId": "agent-8",
+                                  "priority": "URGENT",
+                                  "category": "technical"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.assigneeId").value("agent-8"))
+                .andExpect(jsonPath("$.priority").value("URGENT"))
+                .andExpect(jsonPath("$.category").value("technical"))
+                .andExpect(jsonPath("$.history[0].eventType").value("WORKFLOW_METADATA_CHANGED"))
+                .andExpect(jsonPath("$.history[0].changes[0].field").value("assigneeId"));
+    }
+
+    @Test
+    void updateWorkflowRequiresActorUserId() throws Exception {
+        mockMvc.perform(patch("/api/v1/tenants/tenant-1/tickets/ticket-1/workflow")
+                        .contentType("application/json")
+                        .content("""
+                                { "priority": "HIGH" }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
     private Ticket ticket(String id, String tenantId, TicketStatus status) {
         Ticket ticket = new Ticket();
         ticket.setId(id);
