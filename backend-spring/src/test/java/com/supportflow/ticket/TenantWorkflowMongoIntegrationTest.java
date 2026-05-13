@@ -61,14 +61,14 @@ class TenantWorkflowMongoIntegrationTest {
                 url("/api/v1/tenants/" + tenant.id() + "/tickets"), TicketResponse[].class);
         ResponseEntity<TicketResponse> detailResponse = restTemplate.getForEntity(
                 url("/api/v1/tenants/" + tenant.id() + "/tickets/" + ticket.id()), TicketResponse.class);
-        ResponseEntity<TicketResponse> createResponse = restTemplate.postForEntity(
+        ResponseEntity<String> createResponse = restTemplate.postForEntity(
                 url("/api/v1/tenants/" + tenant.id() + "/tickets"),
                 new TicketCreateRequest("New issue", "Grace Hopper", "grace@example.com", "Cannot submit form",
                         null, null, null),
-                TicketResponse.class);
-        ResponseEntity<TicketResponse> statusResponse = patchStatus(tenant.id(), ticket.id(), TicketStatus.TRIAGED,
+                String.class);
+        ResponseEntity<String> statusResponse = patchStatusError(tenant.id(), ticket.id(), TicketStatus.TRIAGED,
                 actor.id());
-        ResponseEntity<TicketResponse> workflowResponse = patchWorkflow(tenant.id(), ticket.id(),
+        ResponseEntity<String> workflowResponse = patchWorkflowError(tenant.id(), ticket.id(),
                 new TicketWorkflowUpdateRequest(actor.id(), assignee.id(), TicketPriority.HIGH, "technical"));
 
         assertThat(listResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -124,21 +124,21 @@ class TenantWorkflowMongoIntegrationTest {
                 new TicketCreateRequest("Assigned issue", "Ada Lovelace", "ada@example.com", "Cannot log in",
                         null, null, sameTenantAgent.id()),
                 TicketResponse.class);
-        ResponseEntity<TicketResponse> crossTenantResponse = restTemplate.postForEntity(
+        ResponseEntity<String> crossTenantResponse = restTemplate.postForEntity(
                 url("/api/v1/tenants/" + tenantA.id() + "/tickets"),
                 new TicketCreateRequest("Cross tenant issue", "Grace Hopper", "grace@example.com", "Cannot submit",
                         null, null, crossTenantAgent.id()),
-                TicketResponse.class);
-        ResponseEntity<TicketResponse> wrongRoleResponse = restTemplate.postForEntity(
+                String.class);
+        ResponseEntity<String> wrongRoleResponse = restTemplate.postForEntity(
                 url("/api/v1/tenants/" + tenantA.id() + "/tickets"),
                 new TicketCreateRequest("Wrong role issue", "Katherine Johnson", "katherine@example.com",
                         "Cannot export", null, null, tenantAdmin.id()),
-                TicketResponse.class);
-        ResponseEntity<TicketResponse> inactiveResponse = restTemplate.postForEntity(
+                String.class);
+        ResponseEntity<String> inactiveResponse = restTemplate.postForEntity(
                 url("/api/v1/tenants/" + tenantA.id() + "/tickets"),
                 new TicketCreateRequest("Inactive assignee issue", "Dorothy Vaughan", "dorothy@example.com",
                         "Cannot upload", null, null, inactiveAgent.id()),
-                TicketResponse.class);
+                String.class);
 
         assertThat(validResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(validResponse.getBody().assigneeId()).isEqualTo(sameTenantAgent.id());
@@ -157,9 +157,9 @@ class TenantWorkflowMongoIntegrationTest {
                 "agent@tenant-a.example", OperationalUserRole.SUPPORT_AGENT);
         TicketResponse ticket = createTicket(tenantA.id());
 
-        ResponseEntity<TicketResponse> crossTenantStatusResponse = patchStatus(tenantA.id(), ticket.id(),
+        ResponseEntity<String> crossTenantStatusResponse = patchStatusError(tenantA.id(), ticket.id(),
                 TicketStatus.TRIAGED, crossTenantActor.id());
-        ResponseEntity<TicketResponse> crossTenantWorkflowResponse = patchWorkflow(tenantA.id(), ticket.id(),
+        ResponseEntity<String> crossTenantWorkflowResponse = patchWorkflowError(tenantA.id(), ticket.id(),
                 new TicketWorkflowUpdateRequest(crossTenantActor.id(), sameTenantAssignee.id(), TicketPriority.URGENT,
                         "technical"));
         ResponseEntity<TicketResponse> detailResponse = restTemplate.getForEntity(
@@ -188,11 +188,11 @@ class TenantWorkflowMongoIntegrationTest {
         updateUserStatus(tenantA.id(), inactiveAssignee.id(), OperationalUserStatus.INACTIVE);
         TicketResponse ticket = createTicket(tenantA.id());
 
-        ResponseEntity<TicketResponse> crossTenantResponse = patchWorkflow(tenantA.id(), ticket.id(),
+        ResponseEntity<String> crossTenantResponse = patchWorkflowError(tenantA.id(), ticket.id(),
                 new TicketWorkflowUpdateRequest(actor.id(), crossTenantAssignee.id(), TicketPriority.HIGH, null));
-        ResponseEntity<TicketResponse> inactiveResponse = patchWorkflow(tenantA.id(), ticket.id(),
+        ResponseEntity<String> inactiveResponse = patchWorkflowError(tenantA.id(), ticket.id(),
                 new TicketWorkflowUpdateRequest(actor.id(), inactiveAssignee.id(), TicketPriority.HIGH, null));
-        ResponseEntity<TicketResponse> wrongRoleResponse = patchWorkflow(tenantA.id(), ticket.id(),
+        ResponseEntity<String> wrongRoleResponse = patchWorkflowError(tenantA.id(), ticket.id(),
                 new TicketWorkflowUpdateRequest(actor.id(), tenantAdminAssignee.id(), TicketPriority.HIGH, null));
         ResponseEntity<TicketResponse> detailResponse = restTemplate.getForEntity(
                 url("/api/v1/tenants/" + tenantA.id() + "/tickets/" + ticket.id()), TicketResponse.class);
@@ -212,6 +212,7 @@ class TenantWorkflowMongoIntegrationTest {
                 new TenantCreateRequest(name, slug, null),
                 TenantResponse.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
         return response.getBody();
     }
 
@@ -222,6 +223,7 @@ class TenantWorkflowMongoIntegrationTest {
                 new OperationalUserCreateRequest(displayName, email, role),
                 OperationalUserResponse.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
         return response.getBody();
     }
 
@@ -232,6 +234,7 @@ class TenantWorkflowMongoIntegrationTest {
                 new HttpEntity<>(new OperationalUserStatusUpdateRequest(status)),
                 OperationalUserResponse.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
         return response.getBody();
     }
 
@@ -242,6 +245,7 @@ class TenantWorkflowMongoIntegrationTest {
                         null, null, null),
                 TicketResponse.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
         return response.getBody();
     }
 
@@ -254,6 +258,15 @@ class TenantWorkflowMongoIntegrationTest {
                 TicketResponse.class);
     }
 
+    private ResponseEntity<String> patchStatusError(String tenantId, String ticketId, TicketStatus status,
+            String actorUserId) {
+        return restTemplate.exchange(
+                url("/api/v1/tenants/" + tenantId + "/tickets/" + ticketId + "/status"),
+                HttpMethod.PATCH,
+                new HttpEntity<>(new TicketStatusUpdateRequest(status, actorUserId)),
+                String.class);
+    }
+
     private ResponseEntity<TicketResponse> patchWorkflow(String tenantId, String ticketId,
             TicketWorkflowUpdateRequest request) {
         return restTemplate.exchange(
@@ -261,6 +274,15 @@ class TenantWorkflowMongoIntegrationTest {
                 HttpMethod.PATCH,
                 new HttpEntity<>(request),
                 TicketResponse.class);
+    }
+
+    private ResponseEntity<String> patchWorkflowError(String tenantId, String ticketId,
+            TicketWorkflowUpdateRequest request) {
+        return restTemplate.exchange(
+                url("/api/v1/tenants/" + tenantId + "/tickets/" + ticketId + "/workflow"),
+                HttpMethod.PATCH,
+                new HttpEntity<>(request),
+                String.class);
     }
 
     private String url(String path) {

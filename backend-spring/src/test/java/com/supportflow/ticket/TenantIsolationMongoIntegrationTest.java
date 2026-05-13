@@ -2,6 +2,7 @@ package com.supportflow.ticket;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.supportflow.user.OperationalUserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,17 +40,19 @@ class TenantIsolationMongoIntegrationTest {
     void crossTenantTicketReadAndStatusMutationReturn404() {
         TenantCreateResponse tenantA = createTenant("Tenant A", "tenant-a");
         TenantCreateResponse tenantB = createTenant("Tenant B", "tenant-b");
+        OperationalUserResponse tenantBActor = createUser(tenantB.id(), "Tenant B Admin", "admin@tenant-b.example",
+                OperationalUserRole.TENANT_ADMIN);
         TicketResponse ticketA = createTicket(tenantA.id());
 
         ResponseEntity<TicketResponse> ownRead = restTemplate.getForEntity(
                 url("/api/v1/tenants/" + tenantA.id() + "/tickets/" + ticketA.id()), TicketResponse.class);
         ResponseEntity<TicketResponse> crossRead = restTemplate.getForEntity(
                 url("/api/v1/tenants/" + tenantB.id() + "/tickets/" + ticketA.id()), TicketResponse.class);
-        ResponseEntity<TicketResponse> crossPatch = restTemplate.exchange(
+        ResponseEntity<String> crossPatch = restTemplate.exchange(
                 url("/api/v1/tenants/" + tenantB.id() + "/tickets/" + ticketA.id() + "/status"),
                 HttpMethod.PATCH,
-                new HttpEntity<>(new StatusUpdateRequest(TicketStatus.TRIAGED)),
-                TicketResponse.class);
+                new HttpEntity<>(new StatusUpdateRequest(TicketStatus.TRIAGED, tenantBActor.id())),
+                String.class);
         ResponseEntity<TicketResponse[]> tenantBList = restTemplate.getForEntity(
                 url("/api/v1/tenants/" + tenantB.id() + "/tickets"), TicketResponse[].class);
 
@@ -66,6 +69,18 @@ class TenantIsolationMongoIntegrationTest {
                 new TenantCreateRequest(name, slug, null),
                 TenantCreateResponse.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        return response.getBody();
+    }
+
+    private OperationalUserResponse createUser(String tenantId, String displayName, String email,
+            OperationalUserRole role) {
+        ResponseEntity<OperationalUserResponse> response = restTemplate.postForEntity(
+                url("/api/v1/tenants/" + tenantId + "/users"),
+                new OperationalUserCreateRequest(displayName, email, role),
+                OperationalUserResponse.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
         return response.getBody();
     }
 
@@ -75,6 +90,7 @@ class TenantIsolationMongoIntegrationTest {
                 new TicketCreateRequest("Login issue", "Ada Lovelace", "ada@example.com", "Cannot log in"),
                 TicketResponse.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
         return response.getBody();
     }
 
@@ -88,10 +104,16 @@ class TenantIsolationMongoIntegrationTest {
     record TenantCreateResponse(String id) {
     }
 
+    record OperationalUserCreateRequest(String displayName, String email, OperationalUserRole role) {
+    }
+
+    record OperationalUserResponse(String id) {
+    }
+
     record TicketCreateRequest(String subject, String customerName, String customerEmail, String customerMessage) {
     }
 
-    record StatusUpdateRequest(TicketStatus status) {
+    record StatusUpdateRequest(TicketStatus status, String actorUserId) {
     }
 
     record TicketResponse(String id) {
