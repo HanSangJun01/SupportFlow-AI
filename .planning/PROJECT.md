@@ -17,11 +17,15 @@ Prove a portfolio-grade support operations platform that demonstrates reliable m
 - [x] Phase 1 validated explicit ticket lifecycle states and invalid transition rejection.
 - [x] Phase 1 validated tenant isolation for ticket read/list/status mutation boundaries.
 - [x] Phase 1 validated REST API documentation, local backend run instructions, and backend verification coverage.
+- [x] Phase 2 validated tenant metadata updates with immutable slugs and ACTIVE/INACTIVE tenant status.
+- [x] Phase 2 validated tenant-local operational user metadata, roles, statuses, and active actor/support-agent validation helpers.
+- [x] Phase 2 validated actor-attributed ticket status history and workflow metadata history for assignee, priority, and category changes.
+- [x] Phase 2 validated inactive-tenant read vs mutation behavior and cross-tenant actor/assignee denial through API tests and contract documentation.
 
 ### Active
 
 - [ ] Super admins can provision and manage tenant workspaces in a controlled system.
-- [ ] Tenant-scoped users can create, list, view, and process customer inquiry tickets inside isolated workspaces.
+- [ ] Tenant-scoped users can process customer inquiry tickets through AI-assisted draft and approval workflows inside isolated workspaces.
 - [ ] Ticket lifecycle rules are enforced through explicit state transitions such as `NEW`, `TRIAGED`, `IN_PROGRESS`, `ANSWERED`, and `CLOSED`.
 - [ ] The system maintains strict tenant isolation across tickets, knowledge documents, response drafts, logs, and operational metrics.
 - [ ] AI services can classify tickets, retrieve relevant FAQ or policy evidence, and generate draft responses based on that evidence.
@@ -60,7 +64,7 @@ The initial system should support multiple customer companies in the same platfo
 
 The development process is specification-first and verification-driven. Major features should be defined through SDD-style specifications before implementation, including API contracts, data models, state transitions, validation rules, tenant isolation rules, failure cases, and expected test scenarios. Codex may assist with implementation, but generated code must be verified through tests and harnesses before merge. GitHub workflow expectations include feature branches, atomic commits, and pull requests that clearly show the progression from specification to implementation to verification.
 
-The intended v1 proof point is a controlled local environment where a super admin can create a tenant, support agents can operate isolated tickets through a clear lifecycle, AI services can classify and draft with evidence, humans can review and approve drafts, and the system can expose basic operational visibility.
+After Phase 2, the backend supports tenant metadata updates, tenant-local operational users, active actor/support-agent validation, actor-attributed ticket history, workflow metadata changes, inactive-tenant mutation guards, and documented Phase 2 API contracts. The intended v1 proof point remains a controlled local environment where a super admin can create and manage tenants, support agents can operate isolated tickets through a clear lifecycle, AI services can classify and draft with evidence, humans can review and approve drafts, and the system can expose basic operational visibility.
 
 ## Constraints
 
@@ -90,6 +94,9 @@ The intended v1 proof point is a controlled local environment where a super admi
 | Manual ticket intake comes first | Early scope should prove core ticket operations before external channels are added. | — Pending |
 | Super admins provision tenants in the MVP | Controlled tenant creation reduces scope and keeps early multi-tenant behavior auditable. | — Pending |
 | Tenant isolation is designed in from the beginning | Retrofitting isolation later would be risky and undermine the platform's core claim. | Validated for Phase 1 ticket APIs |
+| Tenant slugs remain immutable after creation | Stable tenant identity prevents accidental route, traceability, and isolation drift. | Validated in Phase 2 |
+| Operational users are metadata only until auth work begins | Phase 2 needs actor/assignee attribution without prematurely adding authentication, sessions, or RBAC. | Validated in Phase 2 |
+| Ticket workflow history is embedded on ticket records for v1 | Embedded status/workflow history keeps traceability simple while the backend workflow model stabilizes. | Validated in Phase 2 |
 | The backend and AI service remain separate services | Clear boundaries improve architecture quality, operability, and future scaling flexibility. | — Pending |
 | AI output always requires human approval | The product is a support operations system, not an autonomous response engine. | — Pending |
 | The project is specification-first and verification-driven | Portfolio value depends on defensible architecture, test evidence, and traceable delivery. | Validated in Phase 1 |
@@ -113,4 +120,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-11 after Phase 1 verification*
+*Last updated: 2026-05-13 after Phase 2 verification*

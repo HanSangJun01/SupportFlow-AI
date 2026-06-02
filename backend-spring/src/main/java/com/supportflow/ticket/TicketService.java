@@ -1,10 +1,12 @@
 package com.supportflow.ticket;
 
 import com.supportflow.tenant.TenantService;
+import com.supportflow.user.OperationalUserService;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -14,17 +16,22 @@ public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final TenantService tenantService;
+    private final OperationalUserService operationalUserService;
     private final TicketStatusTransitionPolicy transitionPolicy;
 
     public TicketService(TicketRepository ticketRepository, TenantService tenantService,
-            TicketStatusTransitionPolicy transitionPolicy) {
+            OperationalUserService operationalUserService, TicketStatusTransitionPolicy transitionPolicy) {
         this.ticketRepository = ticketRepository;
         this.tenantService = tenantService;
+        this.operationalUserService = operationalUserService;
         this.transitionPolicy = transitionPolicy;
     }
 
     public Ticket createTicket(String tenantId, CreateTicketCommand command) {
-        tenantService.getTenant(tenantId);
+        tenantService.requireActiveTenant(tenantId);
+        if (command.assigneeId() != null) {
+            operationalUserService.validateActiveSupportAgent(tenantId, command.assigneeId());
+        }
         Instant now = Instant.now();
         Ticket ticket = new Ticket();
         ticket.setTenantId(tenantId);
@@ -60,12 +67,66 @@ public class TicketService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
     }
 
-    public Ticket updateStatus(String tenantId, String ticketId, TicketStatus status) {
+    public Ticket updateStatus(String tenantId, String ticketId, TicketStatus status, String actorUserId) {
+        tenantService.requireActiveTenant(tenantId);
         Ticket ticket = getTicket(tenantId, ticketId);
+        operationalUserService.validateActiveActor(tenantId, actorUserId);
+        TicketStatus previousStatus = ticket.getStatus();
         transitionPolicy.validateTransition(ticket.getStatus(), status);
         ticket.setStatus(status);
-        ticket.setUpdatedAt(Instant.now());
+        Instant now = Instant.now();
+        ticket.setUpdatedAt(now);
+        ticket.getHistory().add(new TicketHistoryEntry(
+                TicketHistoryEventType.STATUS_CHANGED,
+                actorUserId,
+                now,
+                List.of(new TicketFieldChange("status", previousStatus.name(), status.name()))
+        ));
         return ticketRepository.save(ticket);
+    }
+
+    public Ticket updateWorkflowMetadata(String tenantId, String ticketId, UpdateWorkflowMetadataCommand command) {
+        tenantService.requireActiveTenant(tenantId);
+        Ticket ticket = getTicket(tenantId, ticketId);
+        if (ticket.getStatus() == TicketStatus.CLOSED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Closed tickets cannot be edited");
+        }
+        operationalUserService.validateActiveActor(tenantId, command.actorUserId());
+        if (command.assigneeId() != null) {
+            operationalUserService.validateActiveSupportAgent(tenantId, command.assigneeId());
+        }
+
+        List<TicketFieldChange> changes = new ArrayList<>();
+        if (command.assigneeId() != null && !Objects.equals(ticket.getAssigneeId(), command.assigneeId())) {
+            changes.add(new TicketFieldChange("assigneeId", ticket.getAssigneeId(), command.assigneeId()));
+            ticket.setAssigneeId(command.assigneeId());
+        }
+        if (command.priority() != null && ticket.getPriority() != command.priority()) {
+            changes.add(new TicketFieldChange("priority", enumValue(ticket.getPriority()), enumValue(command.priority())));
+            ticket.setPriority(command.priority());
+        }
+        if (command.category() != null && !Objects.equals(ticket.getCategory(), command.category())) {
+            changes.add(new TicketFieldChange("category", ticket.getCategory(), command.category()));
+            ticket.setCategory(command.category());
+        }
+
+        if (changes.isEmpty()) {
+            return ticket;
+        }
+
+        Instant now = Instant.now();
+        ticket.setUpdatedAt(now);
+        ticket.getHistory().add(new TicketHistoryEntry(
+                TicketHistoryEventType.WORKFLOW_METADATA_CHANGED,
+                command.actorUserId(),
+                now,
+                changes
+        ));
+        return ticketRepository.save(ticket);
+    }
+
+    private String enumValue(Enum<?> value) {
+        return value == null ? null : value.name();
     }
 
     public record CreateTicketCommand(
@@ -85,6 +146,14 @@ public class TicketService {
             String assigneeId,
             Instant createdFrom,
             Instant createdTo
+    ) {
+    }
+
+    public record UpdateWorkflowMetadataCommand(
+            String actorUserId,
+            String assigneeId,
+            TicketPriority priority,
+            String category
     ) {
     }
 }

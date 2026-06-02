@@ -3,6 +3,7 @@ package com.supportflow.ticket;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.URI;
@@ -74,7 +75,20 @@ public class TicketController {
     @Operation(summary = "Update a tenant-scoped ticket status")
     public TicketResponse updateStatus(@PathVariable String tenantId, @PathVariable String ticketId,
             @Valid @RequestBody UpdateTicketStatusRequest request) {
-        return TicketResponse.from(ticketService.updateStatus(tenantId, ticketId, request.status()));
+        return TicketResponse.from(ticketService.updateStatus(tenantId, ticketId, request.status(), request.actorUserId()));
+    }
+
+    @PatchMapping("/{ticketId}/workflow")
+    @Operation(summary = "Update tenant-scoped ticket workflow metadata")
+    public TicketResponse updateWorkflow(@PathVariable String tenantId, @PathVariable String ticketId,
+            @Valid @RequestBody UpdateTicketWorkflowRequest request) {
+        return TicketResponse.from(ticketService.updateWorkflowMetadata(tenantId, ticketId,
+                new TicketService.UpdateWorkflowMetadataCommand(
+                        request.actorUserId(),
+                        request.assigneeId(),
+                        request.priority(),
+                        request.category()
+                )));
     }
 
     public record CreateTicketRequest(
@@ -89,7 +103,16 @@ public class TicketController {
     }
 
     public record UpdateTicketStatusRequest(
-            @jakarta.validation.constraints.NotNull TicketStatus status
+            @NotNull TicketStatus status,
+            @NotBlank String actorUserId
+    ) {
+    }
+
+    public record UpdateTicketWorkflowRequest(
+            @NotBlank String actorUserId,
+            String assigneeId,
+            TicketPriority priority,
+            String category
     ) {
     }
 
@@ -105,7 +128,8 @@ public class TicketController {
             TicketPriority priority,
             String assigneeId,
             Instant createdAt,
-            Instant updatedAt
+            Instant updatedAt,
+            List<TicketHistoryEntry> history
     ) {
         static TicketResponse from(Ticket ticket) {
             return new TicketResponse(
@@ -120,7 +144,8 @@ public class TicketController {
                     ticket.getPriority(),
                     ticket.getAssigneeId(),
                     ticket.getCreatedAt(),
-                    ticket.getUpdatedAt()
+                    ticket.getUpdatedAt(),
+                    ticket.getHistory()
             );
         }
     }

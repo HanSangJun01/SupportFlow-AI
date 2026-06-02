@@ -13,7 +13,7 @@ SupportFlow AI will be built as a backend-first, vertical MVP support operations
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Backend Foundation** - Establish the Spring Boot and MongoDB base with tenant-aware ticket APIs and tests.
-- [ ] **Phase 2: Tenant Workflow Core** - Harden tenant workspace operations, workflow rules, and ticket history.
+- [x] **Phase 2: Tenant Workflow Core** - Harden tenant workspace operations, workflow rules, and ticket history.
 - [ ] **Phase 3: Knowledge Base Core** - Add tenant-scoped FAQ and policy document management for later retrieval.
 - [ ] **Phase 4: AI Classification Integration** - Introduce the separate AI service and ticket classification workflow.
 - [ ] **Phase 5: Evidence Retrieval** - Add tenant-scoped RAG evidence retrieval attached to tickets.
@@ -49,7 +49,7 @@ super-admin tenant provisioning
   3. Invalid ticket lifecycle transitions are rejected by backend rules.
   4. Automated tests prove tenant-scoped queries and cross-tenant denial for implemented foundation APIs.
 **Plans**: 4 plans
-**Planning Status**: Ready to execute (planned 2026-05-08)
+**Planning Status**: In progress (02-01 completed 2026-05-13)
 
 Plans:
 **Wave 1**
@@ -70,7 +70,7 @@ Cross-cutting constraints:
 - Phase 1 remains backend-only: no frontend, authentication, AI service integration, Redis runtime dependency, tenant update workflow, or full ticket history.
 
 ### Phase 2: Tenant Workflow Core
-**Goal**: Expand the operational core with tenant metadata, operational user/role metadata, ticket ownership fields, history tracking, and prioritization-ready workflow data.
+**Goal**: As a tenant operations manager and support lead, I want to update tenant operational metadata, manage tenant-local support users, assign and prioritize tickets, and review actor-attributed workflow history through backend APIs, so that SupportFlow AI can support traceable tenant-scoped customer inquiry operations before AI, frontend, and authentication features are added.
 **Mode:** mvp
 **Depends on**: Phase 1
 **Requirements**: [TEN-02, TEN-03, TEN-04, TICK-04, FLOW-03, FLOW-04, FLOW-05, ISO-03]
@@ -80,11 +80,17 @@ Cross-cutting constraints:
   3. Support operations can track ownership and prioritization-supporting fields without introducing full SLA automation.
   4. Tenant isolation remains enforced across the expanded workflow model.
 **Plans**: 3 plans
+**Planning Status**: Complete (02-03 completed 2026-05-13)
 
 Plans:
-- [ ] 02-01: Implement tenant administration read/update workflows and tenant-scoped operational metadata
-- [ ] 02-02: Add ticket ownership, prioritization fields, and immutable workflow history
-- [ ] 02-03: Expand integration coverage for workflow and tenant isolation rules
+**Wave 1**
+- [x] 02-01: Implement tenant administration read/update workflows and tenant-scoped operational metadata
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [x] 02-02: Add ticket ownership, prioritization fields, and immutable workflow history
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [x] 02-03: Expand integration coverage for workflow and tenant isolation rules
 
 ### Phase 3: Knowledge Base Core
 **Goal**: Deliver tenant-scoped knowledge document registration, update, retrieval, and storage models to support later AI retrieval workflows.
@@ -199,7 +205,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Backend Foundation | 4/4 | Complete | 2026-05-11 |
-| 2. Tenant Workflow Core | 0/3 | Not started | - |
+| 2. Tenant Workflow Core | 3/3 | Complete | 2026-05-13 |
 | 3. Knowledge Base Core | 0/2 | Not started | - |
 | 4. AI Classification Integration | 0/3 | Not started | - |
 | 5. Evidence Retrieval | 0/3 | Not started | - |

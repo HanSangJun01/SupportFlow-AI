@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.supportflow.tenant.TenantService;
 import com.supportflow.ticket.TicketService;
+import com.supportflow.user.OperationalUserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,8 +32,11 @@ class OpenApiDocumentationTest {
     @MockitoBean
     private TicketService ticketService;
 
+    @MockitoBean
+    private OperationalUserService operationalUserService;
+
     @Test
-    void apiDocsContainPhaseOneRoutes() throws Exception {
+    void apiDocsContainPhaseOneAndTwoRoutes() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.info.title").value("SupportFlow AI Backend API"))
@@ -41,6 +45,14 @@ class OpenApiDocumentationTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/api/v1/tenants/{tenantId}/tickets")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/api/v1/tenants/{tenantId}/tickets/{ticketId}")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "/api/v1/tenants/{tenantId}/tickets/{ticketId}/status")));
+                        "/api/v1/tenants/{tenantId}/tickets/{ticketId}/status")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "/api/v1/tenants/{tenantId}/users")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "/api/v1/tenants/{tenantId}/users/{userId}")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "/api/v1/tenants/{tenantId}/users/{userId}/status")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "/api/v1/tenants/{tenantId}/tickets/{ticketId}/workflow")));
     }
 }
