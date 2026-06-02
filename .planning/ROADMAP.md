@@ -70,7 +70,7 @@ Cross-cutting constraints:
 - Phase 1 remains backend-only: no frontend, authentication, AI service integration, Redis runtime dependency, tenant update workflow, or full ticket history.
 
 ### Phase 2: Tenant Workflow Core
-**Goal**: Expand the operational core with tenant metadata, operational user/role metadata, ticket ownership fields, history tracking, and prioritization-ready workflow data.
+**Goal**: As a tenant operations manager and support lead, I want to update tenant operational metadata, manage tenant-local support users, assign and prioritize tickets, and review actor-attributed workflow history through backend APIs, so that SupportFlow AI can support traceable tenant-scoped customer inquiry operations before AI, frontend, and authentication features are added.
 **Mode:** mvp
 **Depends on**: Phase 1
 **Requirements**: [TEN-02, TEN-03, TEN-04, TICK-04, FLOW-03, FLOW-04, FLOW-05, ISO-03]
