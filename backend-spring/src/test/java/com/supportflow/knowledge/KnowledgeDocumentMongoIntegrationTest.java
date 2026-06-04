@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.supportflow.tenant.TenantStatus;
 import com.supportflow.user.OperationalUserRole;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -204,7 +205,8 @@ class KnowledgeDocumentMongoIntegrationTest {
         assertThat(archivedList.getBody()).extracting(KnowledgeDocumentResponse::id)
                 .containsExactly(document.id());
         assertThat(secondArchiveResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(secondArchiveResponse.getBody().archivedAt()).isEqualTo(archiveResponse.getBody().archivedAt());
+        assertThat(millis(secondArchiveResponse.getBody().archivedAt()))
+                .isEqualTo(millis(archiveResponse.getBody().archivedAt()));
         assertThat(secondArchiveResponse.getBody().archivedByUserId())
                 .isEqualTo(archiveResponse.getBody().archivedByUserId());
 
@@ -310,6 +312,10 @@ class KnowledgeDocumentMongoIntegrationTest {
 
     private String documentPath(String tenantId, String documentId) {
         return documentsPath(tenantId) + "/" + documentId;
+    }
+
+    private Instant millis(Instant instant) {
+        return instant == null ? null : instant.truncatedTo(ChronoUnit.MILLIS);
     }
 
     private String url(String path) {
