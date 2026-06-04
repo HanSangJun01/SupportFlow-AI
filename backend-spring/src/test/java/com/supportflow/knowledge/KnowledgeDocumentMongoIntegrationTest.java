@@ -138,6 +138,103 @@ class KnowledgeDocumentMongoIntegrationTest {
                 .doesNotContain(tenantADocument.id());
     }
 
+    @Test
+    void inactiveTenantAllowsKnowledgeReadsButRejectsMutations() {
+        TenantResponse tenant = createTenant("Inactive Knowledge Tenant", "inactive-knowledge-tenant");
+        OperationalUserResponse actor = createUser(tenant.id(), "Inactive Tenant Admin",
+                "inactive-knowledge-admin@example.com", OperationalUserRole.TENANT_ADMIN);
+        KnowledgeDocumentResponse document = createDocument(tenant.id(), actor.id(), "Inactive tenant FAQ");
+
+        ResponseEntity<TenantResponse> inactiveResponse = restTemplate.exchange(
+                url("/api/v1/tenants/" + tenant.id()),
+                HttpMethod.PATCH,
+                new HttpEntity<>(new TenantUpdateRequest(null, null, TenantStatus.INACTIVE)),
+                TenantResponse.class);
+        ResponseEntity<KnowledgeDocumentResponse[]> listResponse = restTemplate.getForEntity(
+                url(documentsPath(tenant.id())), KnowledgeDocumentResponse[].class);
+        ResponseEntity<KnowledgeDocumentResponse> detailResponse = restTemplate.getForEntity(
+                url(documentPath(tenant.id(), document.id())), KnowledgeDocumentResponse.class);
+        ResponseEntity<String> createResponse = restTemplate.postForEntity(
+                url(documentsPath(tenant.id())),
+                new KnowledgeDocumentCreateRequest(KnowledgeDocumentType.FAQ, "Blocked create",
+                        "Inactive tenant create should fail.", "Support handbook", null, List.of("inactive"),
+                        null, null, actor.id()),
+                String.class);
+        ResponseEntity<String> updateResponse = patchDocumentError(tenant.id(), document.id(),
+                new KnowledgeDocumentUpdateRequest(null, "Blocked update", null, null, null, null,
+                        null, null, actor.id()));
+        ResponseEntity<String> archiveResponse = patchActorError(tenant.id(), document.id(), "/archive", actor.id());
+        ResponseEntity<String> restoreResponse = patchActorError(tenant.id(), document.id(), "/restore", actor.id());
+
+        assertThat(inactiveResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(inactiveResponse.getBody().status()).isEqualTo(TenantStatus.INACTIVE);
+        assertThat(listResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(listResponse.getBody()).hasSize(1);
+        assertThat(detailResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(detailResponse.getBody().id()).isEqualTo(document.id());
+        assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(updateResponse.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(archiveResponse.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(restoreResponse.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+    }
+
+    @Test
+    void archiveRestoreAndArchivedUpdateRulesArePersisted() {
+        TenantResponse tenant = createTenant("Archive Knowledge Tenant", "archive-knowledge-tenant");
+        OperationalUserResponse actor = createUser(tenant.id(), "Archive Tenant Admin",
+                "archive-knowledge-admin@example.com", OperationalUserRole.TENANT_ADMIN);
+        KnowledgeDocumentResponse document = createDocument(tenant.id(), actor.id(), "Archive FAQ");
+
+        ResponseEntity<KnowledgeDocumentResponse> archiveResponse = patchActor(tenant.id(), document.id(),
+                "/archive", actor.id());
+        ResponseEntity<KnowledgeDocumentResponse[]> defaultList = restTemplate.getForEntity(
+                url(documentsPath(tenant.id())), KnowledgeDocumentResponse[].class);
+        ResponseEntity<KnowledgeDocumentResponse[]> archivedList = restTemplate.getForEntity(
+                url(documentsPath(tenant.id()) + "?status=ARCHIVED"), KnowledgeDocumentResponse[].class);
+        ResponseEntity<KnowledgeDocumentResponse> secondArchiveResponse = patchActor(tenant.id(), document.id(),
+                "/archive", actor.id());
+
+        assertThat(archiveResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(archiveResponse.getBody().status()).isEqualTo(KnowledgeDocumentStatus.ARCHIVED);
+        assertThat(archiveResponse.getBody().archivedAt()).isNotNull();
+        assertThat(archiveResponse.getBody().archivedByUserId()).isEqualTo(actor.id());
+        assertThat(defaultList.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(defaultList.getBody()).isEmpty();
+        assertThat(archivedList.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(archivedList.getBody()).extracting(KnowledgeDocumentResponse::id)
+                .containsExactly(document.id());
+        assertThat(secondArchiveResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(secondArchiveResponse.getBody().archivedAt()).isEqualTo(archiveResponse.getBody().archivedAt());
+        assertThat(secondArchiveResponse.getBody().archivedByUserId())
+                .isEqualTo(archiveResponse.getBody().archivedByUserId());
+
+        ResponseEntity<KnowledgeDocumentResponse> archivedMetadataUpdate = patchDocument(tenant.id(), document.id(),
+                new KnowledgeDocumentUpdateRequest(KnowledgeDocumentType.POLICY, "Archived policy",
+                        null, "Updated handbook", null, List.of("policy"), null, null, actor.id()));
+        ResponseEntity<String> archivedContentUpdate = patchDocumentError(tenant.id(), document.id(),
+                new KnowledgeDocumentUpdateRequest(null, null, "Blocked archived content update",
+                        null, null, null, null, null, actor.id()));
+
+        assertThat(archivedMetadataUpdate.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(archivedMetadataUpdate.getBody().status()).isEqualTo(KnowledgeDocumentStatus.ARCHIVED);
+        assertThat(archivedMetadataUpdate.getBody().type()).isEqualTo(KnowledgeDocumentType.POLICY);
+        assertThat(archivedContentUpdate.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+
+        ResponseEntity<KnowledgeDocumentResponse> restoreResponse = patchActor(tenant.id(), document.id(),
+                "/restore", actor.id());
+        ResponseEntity<KnowledgeDocumentResponse> secondRestoreResponse = patchActor(tenant.id(), document.id(),
+                "/restore", actor.id());
+
+        assertThat(restoreResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(restoreResponse.getBody().status()).isEqualTo(KnowledgeDocumentStatus.ACTIVE);
+        assertThat(restoreResponse.getBody().archivedAt()).isNull();
+        assertThat(restoreResponse.getBody().archivedByUserId()).isNull();
+        assertThat(secondRestoreResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(secondRestoreResponse.getBody().status()).isEqualTo(KnowledgeDocumentStatus.ACTIVE);
+        assertThat(secondRestoreResponse.getBody().archivedAt()).isNull();
+        assertThat(secondRestoreResponse.getBody().archivedByUserId()).isNull();
+    }
+
     private TenantResponse createTenant(String name, String slug) {
         ResponseEntity<TenantResponse> response = restTemplate.postForEntity(
                 url("/api/v1/tenants"),
@@ -180,6 +277,15 @@ class KnowledgeDocumentMongoIntegrationTest {
                 String.class);
     }
 
+    private ResponseEntity<KnowledgeDocumentResponse> patchDocument(String tenantId, String documentId,
+            KnowledgeDocumentUpdateRequest request) {
+        return restTemplate.exchange(
+                url(documentPath(tenantId, documentId)),
+                HttpMethod.PATCH,
+                new HttpEntity<>(request),
+                KnowledgeDocumentResponse.class);
+    }
+
     private ResponseEntity<String> patchActorError(String tenantId, String documentId, String suffix,
             String actorUserId) {
         return restTemplate.exchange(
@@ -187,6 +293,15 @@ class KnowledgeDocumentMongoIntegrationTest {
                 HttpMethod.PATCH,
                 new HttpEntity<>(new KnowledgeDocumentActorRequest(actorUserId)),
                 String.class);
+    }
+
+    private ResponseEntity<KnowledgeDocumentResponse> patchActor(String tenantId, String documentId, String suffix,
+            String actorUserId) {
+        return restTemplate.exchange(
+                url(documentPath(tenantId, documentId) + suffix),
+                HttpMethod.PATCH,
+                new HttpEntity<>(new KnowledgeDocumentActorRequest(actorUserId)),
+                KnowledgeDocumentResponse.class);
     }
 
     private String documentsPath(String tenantId) {

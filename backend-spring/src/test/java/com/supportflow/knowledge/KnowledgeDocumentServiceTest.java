@@ -76,6 +76,103 @@ class KnowledgeDocumentServiceTest {
     }
 
     @Test
+    void createDocumentRejectsMoreThan20Tags() {
+        List<String> tags = java.util.stream.IntStream.rangeClosed(1, 21)
+                .mapToObj(index -> "tag-" + index)
+                .toList();
+
+        assertThatThrownBy(() -> knowledgeDocumentService.createDocument("tenant-1",
+                new KnowledgeDocumentService.CreateKnowledgeDocumentCommand(
+                        KnowledgeDocumentType.FAQ,
+                        "Refund policy",
+                        "Customers can request a refund within 30 days.",
+                        "Support handbook",
+                        null,
+                        tags,
+                        null,
+                        null,
+                        "actor-1"
+                )))
+                .isInstanceOfSatisfying(ResponseStatusException.class, exception -> {
+                    assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+                    assertThat(exception.getReason()).isEqualTo("Documents must not have more than 20 tags");
+                });
+
+        verify(knowledgeDocumentRepository, never()).save(any(KnowledgeDocument.class));
+    }
+
+    @Test
+    void createDocumentRejectsTagsLongerThan50Characters() {
+        assertThatThrownBy(() -> knowledgeDocumentService.createDocument("tenant-1",
+                new KnowledgeDocumentService.CreateKnowledgeDocumentCommand(
+                        KnowledgeDocumentType.FAQ,
+                        "Refund policy",
+                        "Customers can request a refund within 30 days.",
+                        "Support handbook",
+                        null,
+                        List.of("x".repeat(51)),
+                        null,
+                        null,
+                        "actor-1"
+                )))
+                .isInstanceOfSatisfying(ResponseStatusException.class, exception -> {
+                    assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+                    assertThat(exception.getReason()).isEqualTo("Tags must not exceed 50 characters");
+                });
+
+        verify(knowledgeDocumentRepository, never()).save(any(KnowledgeDocument.class));
+    }
+
+    @Test
+    void createDocumentRejectsInvalidEffectiveWindowAndOversizedFields() {
+        assertBadRequestOnCreate(new KnowledgeDocumentService.CreateKnowledgeDocumentCommand(
+                KnowledgeDocumentType.FAQ,
+                "Refund policy",
+                "Customers can request a refund within 30 days.",
+                "Support handbook",
+                null,
+                List.of(),
+                Instant.parse("2026-12-31T23:59:59Z"),
+                Instant.parse("2026-06-01T00:00:00Z"),
+                "actor-1"
+        ));
+        assertBadRequestOnCreate(new KnowledgeDocumentService.CreateKnowledgeDocumentCommand(
+                KnowledgeDocumentType.FAQ,
+                "x".repeat(201),
+                "Customers can request a refund within 30 days.",
+                "Support handbook",
+                null,
+                List.of(),
+                null,
+                null,
+                "actor-1"
+        ));
+        assertBadRequestOnCreate(new KnowledgeDocumentService.CreateKnowledgeDocumentCommand(
+                KnowledgeDocumentType.FAQ,
+                "Refund policy",
+                "Customers can request a refund within 30 days.",
+                "x".repeat(201),
+                null,
+                List.of(),
+                null,
+                null,
+                "actor-1"
+        ));
+        assertBadRequestOnCreate(new KnowledgeDocumentService.CreateKnowledgeDocumentCommand(
+                KnowledgeDocumentType.FAQ,
+                "Refund policy",
+                "x".repeat(50001),
+                "Support handbook",
+                null,
+                List.of(),
+                null,
+                null,
+                "actor-1"
+        ));
+        verify(knowledgeDocumentRepository, never()).save(any(KnowledgeDocument.class));
+    }
+
+    @Test
     @DisplayName("default active list filtering excludes archived documents")
     void listDocumentsExcludesArchivedByDefault() {
         String tenantId = "tenant-1";
@@ -181,6 +278,58 @@ class KnowledgeDocumentServiceTest {
         assertThat(updated.getEffectiveTo()).isEqualTo("2026-12-31T23:59:59Z");
         assertThat(updated.getUpdatedByUserId()).isEqualTo("actor-1");
         verify(knowledgeDocumentRepository).save(archived);
+    }
+
+    @Test
+    void metadataOnlyUpdateKeepsContentHashStable() {
+        String tenantId = "tenant-1";
+        KnowledgeDocument active = document("doc-1", tenantId, KnowledgeDocumentType.FAQ,
+                KnowledgeDocumentStatus.ACTIVE, List.of("billing"), null, null);
+        active.setContentHash("stable-hash");
+        when(knowledgeDocumentRepository.findByTenantIdAndId(tenantId, "doc-1")).thenReturn(Optional.of(active));
+        when(knowledgeDocumentRepository.save(active)).thenReturn(active);
+
+        KnowledgeDocument updated = knowledgeDocumentService.updateDocument(tenantId, "doc-1",
+                new KnowledgeDocumentService.UpdateKnowledgeDocumentCommand(
+                        null,
+                        "Updated title",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        "actor-1"
+                ));
+
+        assertThat(updated.getTitle()).isEqualTo("Updated title");
+        assertThat(updated.getContentHash()).isEqualTo("stable-hash");
+        verify(knowledgeDocumentRepository).save(active);
+    }
+
+    @Test
+    void emptyUpdateReturnsUnchangedDocumentWithoutSaving() {
+        String tenantId = "tenant-1";
+        KnowledgeDocument active = document("doc-1", tenantId, KnowledgeDocumentType.FAQ,
+                KnowledgeDocumentStatus.ACTIVE, List.of("billing"), null, null);
+        when(knowledgeDocumentRepository.findByTenantIdAndId(tenantId, "doc-1")).thenReturn(Optional.of(active));
+
+        KnowledgeDocument updated = knowledgeDocumentService.updateDocument(tenantId, "doc-1",
+                new KnowledgeDocumentService.UpdateKnowledgeDocumentCommand(
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        "actor-1"
+                ));
+
+        assertThat(updated).isSameAs(active);
+        assertThat(updated.getContentHash()).isEqualTo("hash");
+        verify(knowledgeDocumentRepository, never()).save(any(KnowledgeDocument.class));
     }
 
     @Test
@@ -321,6 +470,12 @@ class KnowledgeDocumentServiceTest {
         ArgumentCaptor<KnowledgeDocument> documentCaptor = ArgumentCaptor.forClass(KnowledgeDocument.class);
         verify(knowledgeDocumentRepository).save(documentCaptor.capture());
         assertThat(documentCaptor.getValue().getUpdatedByUserId()).isEqualTo("actor-1");
+    }
+
+    private void assertBadRequestOnCreate(KnowledgeDocumentService.CreateKnowledgeDocumentCommand command) {
+        assertThatThrownBy(() -> knowledgeDocumentService.createDocument("tenant-1", command))
+                .isInstanceOfSatisfying(ResponseStatusException.class,
+                        exception -> assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST));
     }
 
     private KnowledgeDocument document(String id, String tenantId, KnowledgeDocumentType type,
