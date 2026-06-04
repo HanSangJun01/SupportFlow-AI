@@ -22,6 +22,7 @@ key-files:
     - backend-spring/src/test/java/com/supportflow/knowledge/KnowledgeDocumentMongoIntegrationTest.java
     - docs/sdd/phase-03-knowledge-base-core-api.md
   modified:
+    - backend-spring/src/test/java/com/supportflow/knowledge/KnowledgeDocumentMongoIntegrationTest.java
     - backend-spring/src/test/java/com/supportflow/knowledge/KnowledgeDocumentServiceTest.java
     - backend-spring/src/test/java/com/supportflow/common/OpenApiDocumentationTest.java
     - backend-spring/src/test/java/com/supportflow/FoundationVerificationTest.java
@@ -34,6 +35,7 @@ key-decisions:
 patterns-established:
   - "Inactive tenant behavior for knowledge mirrors Phase 2: list/detail remain readable while mutations return HTTP 409."
   - "Archive and restore remain idempotent PATCH operations; restore clears current archive metadata."
+  - "Mongo-persisted archive timestamps are asserted at millisecond precision to match BSON Date storage."
 
 requirements-completed: [KNOW-01, KNOW-02, KNOW-03, KNOW-04]
 
@@ -66,6 +68,7 @@ Each task was committed atomically:
 1. **Task 1: Add Mongo-backed tenant isolation and cross-tenant actor tests** - `2f2143e` (test)
 2. **Task 2: Expand metadata validation, inactive-tenant, filter, and archive-state coverage** - `a85fbe4` (test)
 3. **Task 3: Add OpenAPI assertions, SDD API contract, foundation checks, and full verification** - `2d28e04` (docs)
+4. **Post-executor verification fix: Align Mongo archive timestamp assertion with persisted precision** - `f15adc1` (test)
 
 **Plan metadata:** pending until this summary commit.
 
@@ -96,13 +99,24 @@ Followed the plan's locked defaults: exact filters only, archive/restore idempot
 
 ---
 
-**Total deviations:** 1 auto-fixed (Rule 3 blocking).
+**2. [Rule 3 - Blocking] Truncated Mongo archive timestamp comparison to persisted millisecond precision**
+- **Found during:** Orchestrator post-executor Docker-backed verification (`cd backend-spring && ./mvnw verify`)
+- **Issue:** Mongo persists `Instant` values as BSON dates with millisecond precision, but the idempotent archive assertion compared the original nanosecond-precision `Instant`.
+- **Fix:** Compare archived timestamps after truncating both expected and actual values to milliseconds.
+- **Files modified:** `backend-spring/src/test/java/com/supportflow/knowledge/KnowledgeDocumentMongoIntegrationTest.java`
+- **Verification:** `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentMongoIntegrationTest` passed; `cd backend-spring && ./mvnw verify` passed.
+- **Committed in:** `f15adc1`
+
+---
+
+**Total deviations:** 2 auto-fixed (Rule 3 blocking).
 **Impact on plan:** No scope expansion; the fix was required for the planned full verification gate.
 
 ## Issues Encountered
 
-- Docker socket access is blocked in this managed sandbox, so Testcontainers classes using `@Testcontainers(disabledWithoutDocker = true)` were skipped. The required Maven commands still exited 0, and non-Docker unit/WebMvc tests ran normally.
+- Executor sandbox access initially skipped Testcontainers classes using `@Testcontainers(disabledWithoutDocker = true)`. Orchestrator reran the Docker-backed targeted integration test and full Maven verification after applying the persisted-timestamp assertion fix; both passed with 0 skipped tests.
 - Initial full `verify` failed on the context smoke test until the Phase 3 service mock was added; rerun passed.
+- Orchestrator full `verify` initially failed on the archive idempotency timestamp assertion until the test compared Mongo-persisted millisecond precision; rerun passed.
 
 ## User Setup Required
 
@@ -110,9 +124,9 @@ None - no external service configuration required.
 
 ## Verification
 
-- `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentMongoIntegrationTest` - PASS (Docker-backed tests skipped because Docker is unavailable in this sandbox)
-- `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentServiceTest,KnowledgeDocumentApiIntegrationTest,KnowledgeDocumentMongoIntegrationTest` - PASS (31 ran, 5 Docker-backed tests skipped)
-- `cd backend-spring && ./mvnw verify` - PASS (89 total, 0 failures, 0 errors, 11 Docker-backed tests skipped)
+- `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentMongoIntegrationTest` - PASS (5 total, 0 failures, 0 errors, 0 skipped)
+- `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentServiceTest,KnowledgeDocumentApiIntegrationTest,KnowledgeDocumentMongoIntegrationTest` - PASS (orchestrator targeted Docker rerun covered `KnowledgeDocumentMongoIntegrationTest`; executor sandbox run covered the non-Docker tests)
+- `cd backend-spring && ./mvnw verify` - PASS (89 total, 0 failures, 0 errors, 0 skipped)
 - `docs/sdd/phase-03-knowledge-base-core-api.md` documents the six knowledge endpoints, request/response fields, validation, tenant isolation, archive/restore, and exclusions - PASS
 - Plan task IDs `03-02-01`, `03-02-02`, and `03-02-03` match `.planning/phases/03-knowledge-base-core/03-VALIDATION.md` - PASS
 
