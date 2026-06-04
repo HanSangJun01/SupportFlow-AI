@@ -169,12 +169,13 @@ public class KnowledgeDocumentService {
             return document;
         }
 
-        Instant now = Instant.now();
+        Instant archivedAt = Instant.now();
+        String archivedByUserId = command.actorUserId();
         document.setStatus(KnowledgeDocumentStatus.ARCHIVED);
-        document.setArchivedAt(now);
-        document.setArchivedByUserId(command.actorUserId());
-        document.setUpdatedAt(now);
-        document.setUpdatedByUserId(command.actorUserId());
+        document.setArchivedAt(archivedAt);
+        document.setArchivedByUserId(archivedByUserId);
+        document.setUpdatedAt(archivedAt);
+        document.setUpdatedByUserId(archivedByUserId);
         return knowledgeDocumentRepository.save(document);
     }
 

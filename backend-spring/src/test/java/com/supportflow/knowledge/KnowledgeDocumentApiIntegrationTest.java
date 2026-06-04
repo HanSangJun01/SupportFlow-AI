@@ -140,6 +140,105 @@ class KnowledgeDocumentApiIntegrationTest {
     }
 
     @Test
+    void archiveDocumentReturnsArchiveMetadata() throws Exception {
+        KnowledgeDocument document = document("doc-1", "tenant-1", KnowledgeDocumentType.FAQ,
+                KnowledgeDocumentStatus.ARCHIVED);
+        document.setArchivedAt(Instant.parse("2026-06-04T00:00:00Z"));
+        document.setArchivedByUserId("actor-1");
+        when(knowledgeDocumentService.archiveDocument(eq("tenant-1"), eq("doc-1"),
+                any(KnowledgeDocumentService.ActorCommand.class))).thenReturn(document);
+
+        mockMvc.perform(patch("/api/v1/tenants/tenant-1/knowledge-documents/doc-1/archive")
+                        .contentType("application/json")
+                        .content("""
+                                { "actorUserId": "actor-1" }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ARCHIVED"))
+                .andExpect(jsonPath("$.archivedAt").value("2026-06-04T00:00:00Z"))
+                .andExpect(jsonPath("$.archivedByUserId").value("actor-1"));
+
+        ArgumentCaptor<KnowledgeDocumentService.ActorCommand> commandCaptor =
+                ArgumentCaptor.forClass(KnowledgeDocumentService.ActorCommand.class);
+        verify(knowledgeDocumentService).archiveDocument(eq("tenant-1"), eq("doc-1"), commandCaptor.capture());
+        assertThat(commandCaptor.getValue().actorUserId()).isEqualTo("actor-1");
+    }
+
+    @Test
+    void restoreDocumentReturnsActiveDocumentWithClearedArchiveMetadata() throws Exception {
+        KnowledgeDocument document = document("doc-1", "tenant-1", KnowledgeDocumentType.FAQ,
+                KnowledgeDocumentStatus.ACTIVE);
+        when(knowledgeDocumentService.restoreDocument(eq("tenant-1"), eq("doc-1"),
+                any(KnowledgeDocumentService.ActorCommand.class))).thenReturn(document);
+
+        mockMvc.perform(patch("/api/v1/tenants/tenant-1/knowledge-documents/doc-1/restore")
+                        .contentType("application/json")
+                        .content("""
+                                { "actorUserId": "actor-1" }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.archivedAt").doesNotExist())
+                .andExpect(jsonPath("$.archivedByUserId").doesNotExist());
+
+        ArgumentCaptor<KnowledgeDocumentService.ActorCommand> commandCaptor =
+                ArgumentCaptor.forClass(KnowledgeDocumentService.ActorCommand.class);
+        verify(knowledgeDocumentService).restoreDocument(eq("tenant-1"), eq("doc-1"), commandCaptor.capture());
+        assertThat(commandCaptor.getValue().actorUserId()).isEqualTo("actor-1");
+    }
+
+    @Test
+    void archiveDocumentRequiresActorUserId() throws Exception {
+        mockMvc.perform(patch("/api/v1/tenants/tenant-1/knowledge-documents/doc-1/archive")
+                        .contentType("application/json")
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void restoreDocumentRequiresActorUserId() throws Exception {
+        mockMvc.perform(patch("/api/v1/tenants/tenant-1/knowledge-documents/doc-1/restore")
+                        .contentType("application/json")
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void archiveDocumentReturns200ForAlreadyArchivedDocument() throws Exception {
+        KnowledgeDocument document = document("doc-1", "tenant-1", KnowledgeDocumentType.POLICY,
+                KnowledgeDocumentStatus.ARCHIVED);
+        document.setArchivedAt(Instant.parse("2026-06-04T00:00:00Z"));
+        document.setArchivedByUserId("actor-original");
+        when(knowledgeDocumentService.archiveDocument(eq("tenant-1"), eq("doc-1"),
+                any(KnowledgeDocumentService.ActorCommand.class))).thenReturn(document);
+
+        mockMvc.perform(patch("/api/v1/tenants/tenant-1/knowledge-documents/doc-1/archive")
+                        .contentType("application/json")
+                        .content("""
+                                { "actorUserId": "actor-2" }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ARCHIVED"))
+                .andExpect(jsonPath("$.archivedByUserId").value("actor-original"));
+    }
+
+    @Test
+    void restoreDocumentReturns200ForAlreadyActiveDocument() throws Exception {
+        when(knowledgeDocumentService.restoreDocument(eq("tenant-1"), eq("doc-1"),
+                any(KnowledgeDocumentService.ActorCommand.class)))
+                .thenReturn(document("doc-1", "tenant-1", KnowledgeDocumentType.FAQ,
+                        KnowledgeDocumentStatus.ACTIVE));
+
+        mockMvc.perform(patch("/api/v1/tenants/tenant-1/knowledge-documents/doc-1/restore")
+                        .contentType("application/json")
+                        .content("""
+                                { "actorUserId": "actor-2" }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("ACTIVE"));
+    }
+
+    @Test
     void createDocumentRequiresActorUserId() throws Exception {
         mockMvc.perform(post("/api/v1/tenants/tenant-1/knowledge-documents")
                         .contentType("application/json")

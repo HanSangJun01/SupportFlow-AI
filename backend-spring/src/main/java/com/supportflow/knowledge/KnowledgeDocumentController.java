@@ -91,6 +91,22 @@ public class KnowledgeDocumentController {
                 )));
     }
 
+    @PatchMapping("/{documentId}/archive")
+    @Operation(summary = "Archive a tenant-scoped knowledge document")
+    public KnowledgeDocumentResponse archiveDocument(@PathVariable String tenantId, @PathVariable String documentId,
+            @Valid @RequestBody KnowledgeDocumentActorRequest request) {
+        return KnowledgeDocumentResponse.from(knowledgeDocumentService.archiveDocument(tenantId, documentId,
+                new KnowledgeDocumentService.ActorCommand(request.actorUserId())));
+    }
+
+    @PatchMapping("/{documentId}/restore")
+    @Operation(summary = "Restore a tenant-scoped knowledge document")
+    public KnowledgeDocumentResponse restoreDocument(@PathVariable String tenantId, @PathVariable String documentId,
+            @Valid @RequestBody KnowledgeDocumentActorRequest request) {
+        return KnowledgeDocumentResponse.from(knowledgeDocumentService.restoreDocument(tenantId, documentId,
+                new KnowledgeDocumentService.ActorCommand(request.actorUserId())));
+    }
+
     public record CreateKnowledgeDocumentRequest(
             @NotNull KnowledgeDocumentType type,
             @NotBlank String title,
@@ -115,6 +131,9 @@ public class KnowledgeDocumentController {
             Instant effectiveTo,
             @NotBlank String actorUserId
     ) {
+    }
+
+    public record KnowledgeDocumentActorRequest(@NotBlank String actorUserId) {
     }
 
     public record KnowledgeDocumentResponse(
