@@ -11,6 +11,7 @@ import com.supportflow.tenant.TenantService;
 import com.supportflow.user.OperationalUserService;
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -216,6 +217,43 @@ class KnowledgeDocumentServiceTest {
                 ));
 
         assertThat(documents).extracting(KnowledgeDocument::getId).containsExactly("match");
+    }
+
+    @Test
+    @DisplayName("tag normalization is stable under non-English JVM locales")
+    void tagNormalizationUsesStableLocale() {
+        Locale originalLocale = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+            String tenantId = "tenant-1";
+            when(knowledgeDocumentRepository.save(any(KnowledgeDocument.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            KnowledgeDocument created = knowledgeDocumentService.createDocument(tenantId,
+                    new KnowledgeDocumentService.CreateKnowledgeDocumentCommand(
+                            KnowledgeDocumentType.FAQ,
+                            "Refund policy",
+                            "Customers can request a refund within 30 days.",
+                            "Support handbook",
+                            null,
+                            List.of(" IMPORTANT "),
+                            null,
+                            null,
+                            "actor-1"
+                    ));
+            assertThat(created.getTags()).containsExactly("important");
+
+            KnowledgeDocument indexed = document("doc-1", tenantId, KnowledgeDocumentType.FAQ,
+                    KnowledgeDocumentStatus.ACTIVE, List.of("important"), null, null);
+            when(knowledgeDocumentRepository.findByTenantId(tenantId)).thenReturn(List.of(indexed));
+
+            List<KnowledgeDocument> documents = knowledgeDocumentService.listDocuments(tenantId,
+                    new KnowledgeDocumentService.KnowledgeDocumentFilters(null, null, " IMPORTANT ", null));
+
+            assertThat(documents).extracting(KnowledgeDocument::getId).containsExactly("doc-1");
+        } finally {
+            Locale.setDefault(originalLocale);
+        }
     }
 
     @Test
