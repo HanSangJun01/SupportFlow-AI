@@ -105,7 +105,7 @@ Plans:
 
 Plans:
 - [x] 03-01: Implement tenant-scoped knowledge document APIs and persistence model
-- [ ] 03-02: Add document metadata validation and tenant-isolation tests for knowledge workflows
+- [x] 03-02: Add document metadata validation and tenant-isolation tests for knowledge workflows
 
 ### Phase 4: AI Classification Integration
 **Goal**: Introduce the separate FastAPI AI service and connect it to ticket analysis so agents can inspect ticket classification artifacts.
