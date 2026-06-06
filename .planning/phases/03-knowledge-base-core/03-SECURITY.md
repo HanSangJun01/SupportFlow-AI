@@ -53,7 +53,7 @@ No accepted risks.
 |------|---------|--------|
 | 2026-06-04 | `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentMongoIntegrationTest` | PASS: 5 tests, 0 failures, 0 errors, 0 skipped |
 | 2026-06-04 | `cd backend-spring && ./mvnw verify` | PASS: 90 tests, 0 failures, 0 errors, 0 skipped |
-| 2026-06-06 | `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentServiceTest,KnowledgeDocumentMongoIntegrationTest` | PASS: 22 tests, 0 failures, 0 errors, 5 skipped; Docker socket unavailable in this session, so Mongo Testcontainers were skipped |
+| 2026-06-06 | `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentServiceTest,KnowledgeDocumentMongoIntegrationTest` | PASS: 22 tests, 0 failures, 0 errors, 0 skipped |
 
 ---
 
