@@ -39,10 +39,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Knowledge Base
 
-- [ ] **KNOW-01**: Tenant admin can register FAQ or policy documents for a tenant workspace.
-- [ ] **KNOW-02**: Tenant admin can update and view tenant knowledge documents.
-- [ ] **KNOW-03**: Knowledge documents remain isolated to their tenant workspace.
-- [ ] **KNOW-04**: System stores enough document metadata to support retrieval-backed evidence generation.
+- [x] **KNOW-01**: Tenant admin can register FAQ or policy documents for a tenant workspace.
+- [x] **KNOW-02**: Tenant admin can update and view tenant knowledge documents.
+- [x] **KNOW-03**: Knowledge documents remain isolated to their tenant workspace.
+- [x] **KNOW-04**: System stores enough document metadata to support retrieval-backed evidence generation.
 
 ### AI Classification
 
@@ -167,10 +167,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ISO-02 | Phase 1 | Complete |
 | ISO-03 | Phase 2 | Complete |
 | ISO-04 | Phase 1 | Complete |
-| KNOW-01 | Phase 3 | Pending |
-| KNOW-02 | Phase 3 | Pending |
-| KNOW-03 | Phase 3 | Pending |
-| KNOW-04 | Phase 3 | Pending |
+| KNOW-01 | Phase 3 | Complete |
+| KNOW-02 | Phase 3 | Complete |
+| KNOW-03 | Phase 3 | Complete |
+| KNOW-04 | Phase 3 | Complete |
 | AI-01 | Phase 4 | Pending |
 | AI-02 | Phase 4 | Pending |
 | AI-03 | Phase 4 | Pending |
@@ -203,4 +203,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-05-07*
-*Last updated: 2026-05-13 after Phase 2 Plan 02-03 execution*
+*Last updated: 2026-06-04 after Phase 3 execution*

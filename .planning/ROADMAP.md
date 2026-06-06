@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Backend Foundation** - Establish the Spring Boot and MongoDB base with tenant-aware ticket APIs and tests.
 - [x] **Phase 2: Tenant Workflow Core** - Harden tenant workspace operations, workflow rules, and ticket history.
-- [ ] **Phase 3: Knowledge Base Core** - Add tenant-scoped FAQ and policy document management for later retrieval.
+- [x] **Phase 3: Knowledge Base Core** - Add tenant-scoped FAQ and policy document management for later retrieval.
 - [ ] **Phase 4: AI Classification Integration** - Introduce the separate AI service and ticket classification workflow.
 - [ ] **Phase 5: Evidence Retrieval** - Add tenant-scoped RAG evidence retrieval attached to tickets.
 - [ ] **Phase 6: Draft Review and Approval** - Deliver AI draft generation with human review, edit, and approval controls.
@@ -102,10 +102,11 @@ Plans:
   2. Knowledge documents remain isolated by tenant in storage and queries.
   3. Knowledge records expose metadata sufficient for later retrieval and evidence linking.
 **Plans**: 2 plans
+**Planning Status**: Complete (03-02 completed 2026-06-04)
 
 Plans:
-- [ ] 03-01: Implement tenant-scoped knowledge document APIs and persistence model
-- [ ] 03-02: Add document metadata validation and tenant-isolation tests for knowledge workflows
+- [x] 03-01: Implement tenant-scoped knowledge document APIs and persistence model
+- [x] 03-02: Add document metadata validation and tenant-isolation tests for knowledge workflows
 
 ### Phase 4: AI Classification Integration
 **Goal**: Introduce the separate FastAPI AI service and connect it to ticket analysis so agents can inspect ticket classification artifacts.

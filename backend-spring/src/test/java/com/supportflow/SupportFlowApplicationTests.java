@@ -1,5 +1,6 @@
 package com.supportflow;
 
+import com.supportflow.knowledge.KnowledgeDocumentService;
 import com.supportflow.tenant.TenantService;
 import com.supportflow.ticket.TicketService;
 import com.supportflow.user.OperationalUserService;
@@ -22,6 +23,9 @@ class SupportFlowApplicationTests {
 
     @MockitoBean
     private OperationalUserService operationalUserService;
+
+    @MockitoBean
+    private KnowledgeDocumentService knowledgeDocumentService;
 
     @Test
     void contextLoads() {

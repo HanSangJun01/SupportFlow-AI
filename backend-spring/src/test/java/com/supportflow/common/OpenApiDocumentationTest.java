@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.supportflow.knowledge.KnowledgeDocumentService;
 import com.supportflow.tenant.TenantService;
 import com.supportflow.ticket.TicketService;
 import com.supportflow.user.OperationalUserService;
@@ -35,8 +36,11 @@ class OpenApiDocumentationTest {
     @MockitoBean
     private OperationalUserService operationalUserService;
 
+    @MockitoBean
+    private KnowledgeDocumentService knowledgeDocumentService;
+
     @Test
-    void apiDocsContainPhaseOneAndTwoRoutes() throws Exception {
+    void apiDocsContainPhaseOneTwoAndThreeRoutes() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.info.title").value("SupportFlow AI Backend API"))
@@ -53,6 +57,14 @@ class OpenApiDocumentationTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "/api/v1/tenants/{tenantId}/users/{userId}/status")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "/api/v1/tenants/{tenantId}/tickets/{ticketId}/workflow")));
+                        "/api/v1/tenants/{tenantId}/tickets/{ticketId}/workflow")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "/api/v1/tenants/{tenantId}/knowledge-documents")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "/api/v1/tenants/{tenantId}/knowledge-documents/{documentId}")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "/api/v1/tenants/{tenantId}/knowledge-documents/{documentId}/archive")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "/api/v1/tenants/{tenantId}/knowledge-documents/{documentId}/restore")));
     }
 }

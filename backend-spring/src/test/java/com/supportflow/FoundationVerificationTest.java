@@ -2,9 +2,13 @@ package com.supportflow;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.supportflow.knowledge.KnowledgeDocumentController;
+import com.supportflow.knowledge.KnowledgeDocumentStatus;
+import com.supportflow.knowledge.KnowledgeDocumentType;
 import com.supportflow.tenant.TenantController;
 import com.supportflow.ticket.TicketController;
 import com.supportflow.user.OperationalUserController;
+import java.time.Instant;
 import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,10 +62,33 @@ class FoundationVerificationTest {
     }
 
     @Test
+    void knowledgeDocumentControllerExposesPhaseThreeRoutes() throws NoSuchMethodException {
+        Method createDocument = KnowledgeDocumentController.class.getMethod("createDocument", String.class,
+                KnowledgeDocumentController.CreateKnowledgeDocumentRequest.class);
+        Method listDocuments = KnowledgeDocumentController.class.getMethod("listDocuments", String.class,
+                KnowledgeDocumentType.class, KnowledgeDocumentStatus.class, String.class, Instant.class);
+        Method getDocument = KnowledgeDocumentController.class.getMethod("getDocument", String.class, String.class);
+        Method updateDocument = KnowledgeDocumentController.class.getMethod("updateDocument", String.class,
+                String.class, KnowledgeDocumentController.UpdateKnowledgeDocumentRequest.class);
+        Method archiveDocument = KnowledgeDocumentController.class.getMethod("archiveDocument", String.class,
+                String.class, KnowledgeDocumentController.KnowledgeDocumentActorRequest.class);
+        Method restoreDocument = KnowledgeDocumentController.class.getMethod("restoreDocument", String.class,
+                String.class, KnowledgeDocumentController.KnowledgeDocumentActorRequest.class);
+
+        assertThat(createDocument.isAnnotationPresent(PostMapping.class)).isTrue();
+        assertThat(listDocuments.isAnnotationPresent(GetMapping.class)).isTrue();
+        assertThat(getDocument.isAnnotationPresent(GetMapping.class)).isTrue();
+        assertThat(updateDocument.isAnnotationPresent(PatchMapping.class)).isTrue();
+        assertThat(archiveDocument.isAnnotationPresent(PatchMapping.class)).isTrue();
+        assertThat(restoreDocument.isAnnotationPresent(PatchMapping.class)).isTrue();
+    }
+
+    @Test
     void foundationVerificationClassesExist() throws ClassNotFoundException {
         assertThat(Class.forName("com.supportflow.ticket.TicketStatusTransitionPolicyTest")).isNotNull();
         assertThat(Class.forName("com.supportflow.ticket.TenantIsolationIntegrationTest")).isNotNull();
         assertThat(Class.forName("com.supportflow.ticket.TicketApiIntegrationTest")).isNotNull();
         assertThat(Class.forName("com.supportflow.ticket.TenantWorkflowMongoIntegrationTest")).isNotNull();
+        assertThat(Class.forName("com.supportflow.knowledge.KnowledgeDocumentMongoIntegrationTest")).isNotNull();
     }
 }
