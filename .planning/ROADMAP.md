@@ -93,7 +93,7 @@ Plans:
 - [x] 02-03: Expand integration coverage for workflow and tenant isolation rules
 
 ### Phase 3: Knowledge Base Core
-**Goal**: Deliver tenant-scoped knowledge document registration, update, retrieval, and storage models to support later AI retrieval workflows.
+**Goal**: As a tenant knowledge manager and support lead, I want to create, update, archive, restore, and inspect tenant-scoped FAQ and policy knowledge documents through backend APIs, so that SupportFlow AI can maintain reliable retrieval-ready knowledge sources before AI evidence retrieval and answer generation are added.
 **Mode:** mvp
 **Depends on**: Phase 2
 **Requirements**: [KNOW-01, KNOW-02, KNOW-03, KNOW-04]
