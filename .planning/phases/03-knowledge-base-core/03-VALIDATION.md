@@ -1,10 +1,11 @@
 ---
 phase: 3
 slug: knowledge-base-core
-status: draft
+status: verified
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-06-04
+updated: 2026-06-06
 ---
 
 # Phase 3 - Validation Strategy
@@ -40,12 +41,12 @@ No watch-mode commands should be used in plans.
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 03-01-01 | 03-01 | 1 | KNOW-01, KNOW-02, KNOW-04 | T-03-01-01 | Document model stores tenant id, metadata, audit actors, timestamps, and backend content hash | unit | `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentServiceTest` | W0 | pending |
-| 03-01-02 | 03-01 | 1 | KNOW-01, KNOW-02, KNOW-03 | T-03-01-02 | Tenant-scoped REST routes use active-tenant mutation guards and tenant-id lookups | unit + WebMvc | `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentServiceTest,KnowledgeDocumentApiIntegrationTest` | W0 | pending |
-| 03-01-03 | 03-01 | 1 | KNOW-02, KNOW-04 | T-03-01-03 | Archive/restore preserve traceability and reject archived content edits | unit + WebMvc | `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentServiceTest,KnowledgeDocumentApiIntegrationTest` | W0 | pending |
-| 03-02-01 | 03-02 | 2 | KNOW-03 | T-03-02-01 | Cross-tenant document ids and actor ids do not leak or mutate data | integration | `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentMongoIntegrationTest` | W0 | pending |
-| 03-02-02 | 03-02 | 2 | KNOW-01, KNOW-02, KNOW-04 | T-03-02-02 | Inactive tenant read/mutation split, filters, archive defaults, and restore behavior are proven over Mongo | integration | `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentMongoIntegrationTest` | W0 | pending |
-| 03-02-03 | 03-02 | 2 | QUAL-01 evidence | T-03-02-03 | OpenAPI and SDD document the API contract and exclusions | docs + full suite | `cd backend-spring && ./mvnw verify` | W0 | pending |
+| 03-01-01 | 03-01 | 1 | KNOW-01, KNOW-02, KNOW-04 | T-03-01-01 | Document model stores tenant id, metadata, audit actors, timestamps, and backend content hash | unit | `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentServiceTest` | yes | covered |
+| 03-01-02 | 03-01 | 1 | KNOW-01, KNOW-02, KNOW-03 | T-03-01-02 | Tenant-scoped REST routes use active-tenant mutation guards and tenant-id lookups | unit + WebMvc | `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentServiceTest,KnowledgeDocumentApiIntegrationTest` | yes | covered |
+| 03-01-03 | 03-01 | 1 | KNOW-02, KNOW-04 | T-03-01-03 | Archive/restore preserve traceability and reject archived content edits | unit + WebMvc | `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentServiceTest,KnowledgeDocumentApiIntegrationTest` | yes | covered |
+| 03-02-01 | 03-02 | 2 | KNOW-03 | T-03-02-01 | Cross-tenant document ids and actor ids do not leak or mutate data | integration | `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentMongoIntegrationTest` | yes | covered |
+| 03-02-02 | 03-02 | 2 | KNOW-01, KNOW-02, KNOW-04 | T-03-02-02 | Inactive tenant read/mutation split, filters, archive defaults, and restore behavior are proven over Mongo | integration | `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentMongoIntegrationTest` | yes | covered |
+| 03-02-03 | 03-02 | 2 | QUAL-01 evidence | T-03-02-03 | OpenAPI and SDD document the API contract and exclusions | docs + full suite | `cd backend-spring && ./mvnw verify` | yes | covered |
 
 ---
 
@@ -64,11 +65,11 @@ No watch-mode commands should be used in plans.
 
 ## Wave 0 Requirements
 
-- [ ] `backend-spring/src/test/java/com/supportflow/knowledge/KnowledgeDocumentServiceTest.java` - service/model tests for document shape, actor validation, hash generation, archive behavior, and filters.
-- [ ] `backend-spring/src/test/java/com/supportflow/knowledge/KnowledgeDocumentApiIntegrationTest.java` - WebMvc tests for routes, request validation, response shape, and error mapping.
-- [ ] `backend-spring/src/test/java/com/supportflow/knowledge/KnowledgeDocumentMongoIntegrationTest.java` - Docker-backed tests for tenant isolation, inactive-tenant behavior, archive/default-list behavior, restore, and cross-tenant actor denial.
-- [ ] `backend-spring/src/test/java/com/supportflow/common/OpenApiDocumentationTest.java` - assertions for Phase 3 knowledge document routes.
-- [ ] `docs/sdd/phase-03-knowledge-base-core-api.md` - API contract and explicit Phase 3 exclusions.
+- [x] `backend-spring/src/test/java/com/supportflow/knowledge/KnowledgeDocumentServiceTest.java` - service/model tests for document shape, actor validation, hash generation, archive behavior, and filters.
+- [x] `backend-spring/src/test/java/com/supportflow/knowledge/KnowledgeDocumentApiIntegrationTest.java` - WebMvc tests for routes, request validation, response shape, and error mapping.
+- [x] `backend-spring/src/test/java/com/supportflow/knowledge/KnowledgeDocumentMongoIntegrationTest.java` - Docker-backed tests for tenant isolation, inactive-tenant behavior, archive/default-list behavior, restore, and cross-tenant actor denial.
+- [x] `backend-spring/src/test/java/com/supportflow/common/OpenApiDocumentationTest.java` - assertions for Phase 3 knowledge document routes.
+- [x] `docs/sdd/phase-03-knowledge-base-core-api.md` - API contract and explicit Phase 3 exclusions.
 
 ---
 
@@ -78,13 +79,27 @@ All Phase 3 behaviors have automated verification.
 
 ---
 
+## Validation Audit 2026-06-06
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+
+Evidence:
+- `cd backend-spring && ./mvnw test -Dtest=KnowledgeDocumentServiceTest,KnowledgeDocumentMongoIntegrationTest` - PASS (22 tests, 0 failures, 0 errors, 0 skipped)
+- `cd backend-spring && ./mvnw verify` - PASS (90 tests, 0 failures, 0 errors, 0 skipped)
+
+---
+
 ## Validation Sign-Off
 
-- [ ] All tasks have automated verification commands.
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify.
-- [ ] Wave 0 covers all missing test references.
-- [ ] No watch-mode flags.
-- [ ] Feedback latency under 120 seconds for targeted tests.
+- [x] All tasks have automated verification commands.
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify.
+- [x] Wave 0 covers all missing test references.
+- [x] No watch-mode flags.
+- [x] Feedback latency under 120 seconds for targeted tests.
 - [x] `nyquist_compliant: true` set in frontmatter.
 
-**Approval:** pending
+**Approval:** verified 2026-06-06
