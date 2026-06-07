@@ -1,0 +1,194 @@
+{
+  "phase": "04",
+  "phase_name": "ai-classification-integration",
+  "timestamp": "2026-06-07T06:31:11Z",
+  "status": "paused",
+  "resume_at": "Local AI Behavior",
+  "pause_note": "User stopped before answering Local AI Behavior Question 1. Resume Phase 4 discussion from Local AI Behavior next time. Do not finalize 04-CONTEXT.md until remaining areas are discussed.",
+  "areas_completed": ["Classification Contract", "Invocation Flow", "Artifact Storage And Review"],
+  "areas_remaining": [
+    "Local AI Behavior",
+    "Failure And Timeout Behavior"
+  ],
+  "decisions": {
+    "Classification Contract": [
+      {
+        "question": "What should the AI service return as the core Phase 4 classification payload?",
+        "answer": "Operational fields only: category, urgency, sentiment, priority, plus confidence.",
+        "options_presented": [
+          "Operational fields only",
+          "Fields plus explanation",
+          "Full audit envelope",
+          "You decide"
+        ]
+      },
+      {
+        "question": "What value sets should Phase 4 use for the operational classification fields?",
+        "answer": "Small fixed enums for urgency, sentiment, and priority, with simple category strings.",
+        "options_presented": [
+          "Small fixed enums",
+          "Free-form labels",
+          "Hybrid",
+          "You decide"
+        ]
+      },
+      {
+        "question": "Should the classification response include confidence?",
+        "answer": "Yes, confidence is required as a numeric 0.0-1.0 value.",
+        "options_presented": [
+          "Yes, required 0.0-1.0",
+          "Yes, optional",
+          "No confidence in Phase 4",
+          "You decide"
+        ]
+      },
+      {
+        "question": "Should Phase 4 include a human-readable explanation field?",
+        "answer": "No, defer rationale; Phase 4 stores operational fields plus confidence only.",
+        "options_presented": [
+          "No, defer rationale",
+          "Yes, short rationale",
+          "Only debug-only rationale in tests/docs",
+          "You decide"
+        ]
+      }
+    ],
+    "Invocation Flow": [
+      {
+        "question": "How should ticket classification be triggered in Phase 4?",
+        "answer": "Both automatic classification on ticket creation and a manual backend re-analysis endpoint.",
+        "options_presented": [
+          "Manual backend endpoint only",
+          "Automatically on ticket creation",
+          "Both manual and automatic",
+          "You decide"
+        ]
+      },
+      {
+        "question": "When automatic classification runs on ticket creation, what should happen if the AI service is unavailable?",
+        "answer": "Ticket creation succeeds and a failed classification artifact is recorded.",
+        "options_presented": [
+          "Ticket still creates, classification records failure",
+          "Ticket creation fails",
+          "Ticket creates with no artifact",
+          "You decide"
+        ]
+      },
+      {
+        "question": "Should users be able to re-run classification for an existing ticket?",
+        "answer": "Yes, manual re-analysis is allowed for existing tickets.",
+        "options_presented": [
+          "Yes, manual re-analysis allowed",
+          "Only retry failed attempts",
+          "No re-analysis in Phase 4",
+          "You decide"
+        ]
+      },
+      {
+        "question": "What ticket states should allow classification?",
+        "answer": "Classification is allowed for any non-closed ticket.",
+        "options_presented": [
+          "Any non-closed ticket",
+          "Only NEW/TRIAGED tickets",
+          "Any ticket including CLOSED",
+          "You decide"
+        ]
+      }
+    ],
+    "Artifact Storage And Review": [
+      {
+        "question": "How should classification attempts be stored on the backend?",
+        "answer": "Store classification attempts as append-only history.",
+        "options_presented": [
+          "Append-only history",
+          "Latest only",
+          "Latest plus compact previous status",
+          "You decide"
+        ]
+      },
+      {
+        "question": "Where should classification artifacts appear for operational consumers?",
+        "answer": "Embed classification artifacts in ticket detail for operational inspection.",
+        "options_presented": [
+          "Embedded in ticket detail",
+          "Separate classification endpoint only",
+          "Both embedded and separate list/detail endpoint",
+          "You decide"
+        ]
+      },
+      {
+        "question": "What should each stored classification attempt include?",
+        "answer": "Store attempt id, status, trigger, actor if manual, timestamps, result fields on success, and error code/message on failure.",
+        "options_presented": [
+          "Status plus result/error",
+          "Only success result fields",
+          "Full request/response snapshot",
+          "You decide"
+        ]
+      },
+      {
+        "question": "Should classification artifacts directly overwrite ticket category and priority?",
+        "answer": "Yes. Successful AI predictions automatically apply predicted category and priority to the ticket, while preserving append-only classification history and workflow traceability. Failed classification attempts do not change ticket category or priority. Re-analysis creates a new classification attempt and updates category/priority again if successful.",
+        "options_presented": [
+          "No, keep as reviewable artifacts first",
+          "Yes, overwrite category/priority automatically",
+          "Only fill empty category/priority",
+          "You decide",
+          "User-provided revision"
+        ]
+      },
+      {
+        "question": "How should automatic AI-applied ticket updates remain traceable?",
+        "answer": "Store the classification attempt as an artifact, apply category and priority from the successful result, record a workflow history entry showing the update was applied by AI classification, and link that history entry to classificationAttemptId.",
+        "options_presented": [
+          "User-provided revision"
+        ]
+      },
+      {
+        "question": "How should manual classification attempts record the requesting actor?",
+        "answer": "Manual re-analysis requires actorUserId because it is an operational action and should be attributable like Phase 2/3 mutations.",
+        "options_presented": [
+          "Require actorUserId",
+          "Actor optional",
+          "No actor on AI classification",
+          "You decide"
+        ]
+      },
+      {
+        "question": "Should automatic classification attempts on ticket creation have an actor?",
+        "answer": "No human actor. Automatic attempts use trigger metadata such as AUTO_ON_CREATE and do not invent a fake system user.",
+        "options_presented": [
+          "No human actor; use trigger metadata",
+          "Use a reserved system actor id",
+          "Use ticket creator when available",
+          "You decide"
+        ]
+      },
+      {
+        "question": "Should the AI-applied category/priority workflow history entry use a new history event type?",
+        "answer": "Yes. Use a new AI classification history event type to distinguish AI-applied changes from human workflow metadata edits.",
+        "options_presented": [
+          "Yes, new AI classification event type",
+          "Reuse workflow metadata changed",
+          "Use status/history note only",
+          "You decide"
+        ]
+      }
+    ]
+  },
+  "deferred_ideas": [
+    "Human-readable AI rationale can be revisited in later evidence or draft-generation phases."
+  ],
+  "canonical_refs": [
+    ".planning/PROJECT.md",
+    ".planning/REQUIREMENTS.md",
+    ".planning/ROADMAP.md",
+    ".planning/STATE.md",
+    ".planning/phases/02-tenant-workflow-core/02-CONTEXT.md",
+    ".planning/phases/03-knowledge-base-core/03-CONTEXT.md",
+    "backend-spring/src/main/java/com/supportflow/ticket/Ticket.java",
+    "backend-spring/src/main/java/com/supportflow/ticket/TicketService.java",
+    "backend-spring/src/main/java/com/supportflow/ticket/TicketController.java",
+    "docker-compose.yml"
+  ]
+}
