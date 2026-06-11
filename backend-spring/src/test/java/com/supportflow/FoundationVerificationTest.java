@@ -6,10 +6,14 @@ import com.supportflow.knowledge.KnowledgeDocumentController;
 import com.supportflow.knowledge.KnowledgeDocumentStatus;
 import com.supportflow.knowledge.KnowledgeDocumentType;
 import com.supportflow.tenant.TenantController;
+import com.supportflow.ticket.TicketClassificationAttempt;
 import com.supportflow.ticket.TicketController;
+import com.supportflow.ticket.TicketHistoryEventType;
 import com.supportflow.user.OperationalUserController;
-import java.time.Instant;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -90,5 +94,19 @@ class FoundationVerificationTest {
         assertThat(Class.forName("com.supportflow.ticket.TicketApiIntegrationTest")).isNotNull();
         assertThat(Class.forName("com.supportflow.ticket.TenantWorkflowMongoIntegrationTest")).isNotNull();
         assertThat(Class.forName("com.supportflow.knowledge.KnowledgeDocumentMongoIntegrationTest")).isNotNull();
+    }
+
+    @Test
+    void phaseFourClassificationArtifactsAndRoutesExist() throws NoSuchMethodException, ClassNotFoundException {
+        Method reanalyzeTicket = TicketController.class.getMethod("reanalyzeTicket", String.class, String.class,
+                TicketController.ReanalyzeTicketRequest.class);
+
+        assertThat(reanalyzeTicket.isAnnotationPresent(PostMapping.class)).isTrue();
+        assertThat(TicketClassificationAttempt.class).isNotNull();
+        assertThat(TicketHistoryEventType.AI_CLASSIFICATION_APPLIED).isNotNull();
+        assertThat(Class.forName("com.supportflow.ticket.TicketClassificationMongoIntegrationTest")).isNotNull();
+        assertThat(Files.exists(Path.of("../ai-service-python"))).isTrue();
+        assertThat(Files.exists(Path.of("../.planning/phases/04-ai-classification-integration/04-AI-SPEC.md")))
+                .isTrue();
     }
 }

@@ -65,6 +65,8 @@ class OpenApiDocumentationTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "/api/v1/tenants/{tenantId}/knowledge-documents/{documentId}/archive")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "/api/v1/tenants/{tenantId}/knowledge-documents/{documentId}/restore")));
+                        "/api/v1/tenants/{tenantId}/knowledge-documents/{documentId}/restore")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "/api/v1/tenants/{tenantId}/tickets/{ticketId}/classification-attempts")));
     }
 }

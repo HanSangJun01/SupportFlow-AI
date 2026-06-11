@@ -49,9 +49,50 @@ API documentation:
 - Swagger UI: http://localhost:8080/swagger-ui.html
 - Phase 1 backend contract: `docs/sdd/phase-01-backend-foundation-api.md`
 - Phase 2 tenant workflow contract: `docs/sdd/phase-02-tenant-workflow-core-api.md`
+- Phase 3 knowledge base contract: `docs/sdd/phase-03-knowledge-base-core-api.md`
+- Phase 4 AI classification contract: `docs/sdd/phase-04-ai-classification-integration-api.md`
 
 Phase 2 verification:
 
 ```bash
 cd backend-spring && ./mvnw verify
 ```
+
+## Phase 4 AI Classification Local Development
+
+Run the FastAPI AI service tests:
+
+```bash
+cd ai-service-python
+. .venv/bin/activate 2>/dev/null || python3 -m venv .venv && . .venv/bin/activate
+python -m pip install "fastapi[standard]==0.136.3" "pydantic==2.13.4" "pytest==9.0.3" "httpx>=0.27,<1"
+python -m pytest
+```
+
+Run the full local stack with Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+The compose stack includes `mongodb`, `backend`, `ai-service`, and `redis`. Classification uses the FastAPI service through:
+
+```bash
+SUPPORTFLOW_AI_CLASSIFICATION_BASE_URL=http://ai-service:8000
+```
+
+Targeted Phase 4 verification:
+
+```bash
+cd backend-spring && ./mvnw test -Dtest=TicketClassificationMongoIntegrationTest
+cd backend-spring && ./mvnw test -Dtest=OpenApiDocumentationTest,FoundationVerificationTest
+```
+
+Full Phase 4 verification:
+
+```bash
+cd ai-service-python && python -m pytest
+cd ../backend-spring && ./mvnw verify
+```
+
+Phase 4 uses deterministic local keyword classification only: no provider-backed LLM, no prompts, no RAG, no embeddings, no vector search, no draft generation, no async jobs, no frontend UI, no authentication, and no full RBAC.
