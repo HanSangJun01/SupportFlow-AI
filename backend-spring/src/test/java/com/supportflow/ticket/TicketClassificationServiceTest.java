@@ -175,6 +175,8 @@ class TicketClassificationServiceTest {
         assertThat(created.getCategory()).isEqualTo("general");
         assertThat(created.getPriority()).isEqualTo(TicketPriority.LOW);
         assertThat(created.getHistory()).isEmpty();
+        assertThat(created.getHistory()).extracting(TicketHistoryEntry::getEventType)
+                .doesNotContain(TicketHistoryEventType.AI_CLASSIFICATION_APPLIED);
         assertThat(created.getClassificationAttempts()).singleElement()
                 .satisfies(attempt -> {
                     assertThat(attempt.getStatus()).isEqualTo(TicketClassificationAttemptStatus.FAILED);
@@ -225,12 +227,55 @@ class TicketClassificationServiceTest {
         assertThat(updated.getCategory()).isEqualTo("account");
         assertThat(updated.getPriority()).isEqualTo(TicketPriority.HIGH);
         assertThat(updated.getHistory()).isEmpty();
+        assertThat(updated.getHistory()).extracting(TicketHistoryEntry::getEventType)
+                .doesNotContain(TicketHistoryEventType.AI_CLASSIFICATION_APPLIED);
         assertThat(updated.getClassificationAttempts()).singleElement()
                 .satisfies(attempt -> {
                     assertThat(attempt.getStatus()).isEqualTo(TicketClassificationAttemptStatus.FAILED);
                     assertThat(attempt.getTrigger()).isEqualTo(TicketClassificationTrigger.MANUAL_REANALYSIS);
                     assertThat(attempt.getActorUserId()).isEqualTo("actor-1");
                 });
+    }
+
+    @Test
+    void manualReanalysisRejectsInactiveTenantBeforeCallingAi() {
+        when(tenantService.requireActiveTenant("tenant-1"))
+                .thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Tenant is inactive"));
+
+        assertThatThrownBy(() -> ticketService.reanalyzeTicket("tenant-1", "ticket-1", "actor-1"))
+                .isInstanceOfSatisfying(ResponseStatusException.class, exception ->
+                        assertThat(((ResponseStatusException) exception).getStatusCode()).isEqualTo(HttpStatus.CONFLICT));
+
+        verify(ticketRepository, never()).findByTenantIdAndId("tenant-1", "ticket-1");
+        verify(operationalUserService, never()).validateActiveActor("tenant-1", "actor-1");
+        verify(aiClassificationClient, never()).classify(any());
+    }
+
+    @Test
+    void manualReanalysisRejectsMissingTicketBeforeCallingAi() {
+        when(ticketRepository.findByTenantIdAndId("tenant-1", "missing-ticket")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> ticketService.reanalyzeTicket("tenant-1", "missing-ticket", "actor-1"))
+                .isInstanceOfSatisfying(ResponseStatusException.class, exception ->
+                        assertThat(((ResponseStatusException) exception).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND));
+
+        verify(operationalUserService, never()).validateActiveActor("tenant-1", "actor-1");
+        verify(aiClassificationClient, never()).classify(any());
+    }
+
+    @Test
+    void manualReanalysisRejectsCrossTenantActorBeforeCallingAi() {
+        Ticket ticket = ticket("ticket-1", "tenant-1", TicketStatus.TRIAGED, "account", TicketPriority.HIGH);
+        when(ticketRepository.findByTenantIdAndId("tenant-1", "ticket-1")).thenReturn(Optional.of(ticket));
+        when(operationalUserService.validateActiveActor("tenant-1", "actor-other-tenant"))
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Operational user not found"));
+
+        assertThatThrownBy(() -> ticketService.reanalyzeTicket("tenant-1", "ticket-1", "actor-other-tenant"))
+                .isInstanceOfSatisfying(ResponseStatusException.class, exception ->
+                        assertThat(((ResponseStatusException) exception).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND));
+
+        verify(aiClassificationClient, never()).classify(any());
+        verify(ticketRepository, never()).save(ticket);
     }
 
     @Test
