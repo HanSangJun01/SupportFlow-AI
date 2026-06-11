@@ -1,0 +1,2 @@
+SERVICE_TITLE = "SupportFlow AI Service"
+SERVICE_VERSION = "0.1.0"
