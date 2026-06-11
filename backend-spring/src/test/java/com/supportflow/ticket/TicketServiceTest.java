@@ -4,9 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.supportflow.ai.AiClassificationClient;
+import com.supportflow.ai.TicketClassificationResponse;
 import com.supportflow.tenant.TenantService;
 import com.supportflow.user.OperationalUserService;
 import java.time.Instant;
@@ -34,6 +37,9 @@ class TicketServiceTest {
     @Mock
     private TicketStatusTransitionPolicy transitionPolicy;
 
+    @Mock
+    private AiClassificationClient aiClassificationClient;
+
     @InjectMocks
     private TicketService ticketService;
 
@@ -43,6 +49,14 @@ class TicketServiceTest {
         Ticket commandBackedTicket = ticket("ticket-1", tenantId, TicketStatus.NEW, TicketPriority.HIGH, "agent-7",
                 "2026-05-11T12:00:00Z");
         when(ticketRepository.save(any(Ticket.class))).thenReturn(commandBackedTicket);
+        when(aiClassificationClient.classify(any())).thenReturn(new TicketClassificationResponse(
+                "account",
+                TicketClassificationUrgency.NORMAL,
+                TicketClassificationSentiment.NEUTRAL,
+                TicketPriority.MEDIUM,
+                0.74,
+                "rules-v1"
+        ));
 
         Ticket created = ticketService.createTicket(tenantId, new TicketService.CreateTicketCommand(
                 "Cannot log in",
@@ -55,9 +69,12 @@ class TicketServiceTest {
         ));
 
         assertThat(created.getAssigneeId()).isEqualTo("agent-7");
+        assertThat(created.getClassificationAttempts()).singleElement()
+                .satisfies(attempt -> assertThat(attempt.getStatus())
+                        .isEqualTo(TicketClassificationAttemptStatus.SUCCESS));
         verify(tenantService).requireActiveTenant(tenantId);
         verify(operationalUserService).validateActiveSupportAgent(tenantId, "agent-7");
-        verify(ticketRepository).save(any(Ticket.class));
+        verify(ticketRepository, times(2)).save(any(Ticket.class));
     }
 
     @Test
@@ -80,6 +97,7 @@ class TicketServiceTest {
 
         verify(tenantService).requireActiveTenant(tenantId);
         verify(ticketRepository, never()).save(any(Ticket.class));
+        verify(aiClassificationClient, never()).classify(any());
     }
 
     @Test

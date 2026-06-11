@@ -91,6 +91,13 @@ public class TicketController {
                 )));
     }
 
+    @PostMapping("/{ticketId}/classification-attempts")
+    @Operation(summary = "Re-analyze a tenant-scoped ticket classification")
+    public TicketResponse reanalyzeTicket(@PathVariable String tenantId, @PathVariable String ticketId,
+            @Valid @RequestBody ReanalyzeTicketRequest request) {
+        return TicketResponse.from(ticketService.reanalyzeTicket(tenantId, ticketId, request.actorUserId()));
+    }
+
     public record CreateTicketRequest(
             @NotBlank String subject,
             @NotBlank String customerName,
@@ -116,6 +123,11 @@ public class TicketController {
     ) {
     }
 
+    public record ReanalyzeTicketRequest(
+            @NotBlank String actorUserId
+    ) {
+    }
+
     public record TicketResponse(
             String id,
             String tenantId,
@@ -129,7 +141,8 @@ public class TicketController {
             String assigneeId,
             Instant createdAt,
             Instant updatedAt,
-            List<TicketHistoryEntry> history
+            List<TicketHistoryEntry> history,
+            List<TicketClassificationAttempt> classificationAttempts
     ) {
         static TicketResponse from(Ticket ticket) {
             return new TicketResponse(
@@ -145,7 +158,8 @@ public class TicketController {
                     ticket.getAssigneeId(),
                     ticket.getCreatedAt(),
                     ticket.getUpdatedAt(),
-                    ticket.getHistory()
+                    ticket.getHistory(),
+                    ticket.getClassificationAttempts()
             );
         }
     }

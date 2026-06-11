@@ -1,5 +1,9 @@
 package com.supportflow.ticket;
 
+import com.supportflow.ai.AiClassificationClient;
+import com.supportflow.ai.TicketClassificationException;
+import com.supportflow.ai.TicketClassificationRequest;
+import com.supportflow.ai.TicketClassificationResponse;
 import com.supportflow.tenant.TenantService;
 import com.supportflow.user.OperationalUserService;
 import java.time.Instant;
@@ -18,13 +22,16 @@ public class TicketService {
     private final TenantService tenantService;
     private final OperationalUserService operationalUserService;
     private final TicketStatusTransitionPolicy transitionPolicy;
+    private final AiClassificationClient aiClassificationClient;
 
     public TicketService(TicketRepository ticketRepository, TenantService tenantService,
-            OperationalUserService operationalUserService, TicketStatusTransitionPolicy transitionPolicy) {
+            OperationalUserService operationalUserService, TicketStatusTransitionPolicy transitionPolicy,
+            AiClassificationClient aiClassificationClient) {
         this.ticketRepository = ticketRepository;
         this.tenantService = tenantService;
         this.operationalUserService = operationalUserService;
         this.transitionPolicy = transitionPolicy;
+        this.aiClassificationClient = aiClassificationClient;
     }
 
     public Ticket createTicket(String tenantId, CreateTicketCommand command) {
@@ -45,7 +52,8 @@ public class TicketService {
         ticket.setStatus(TicketStatus.NEW);
         ticket.setCreatedAt(now);
         ticket.setUpdatedAt(now);
-        return ticketRepository.save(ticket);
+        Ticket savedTicket = ticketRepository.save(ticket);
+        return recordClassificationAttempt(savedTicket, TicketClassificationTrigger.AUTO_ON_CREATE, null);
     }
 
     public List<Ticket> listTickets(String tenantId, TicketFilters filters) {
@@ -123,6 +131,80 @@ public class TicketService {
                 changes
         ));
         return ticketRepository.save(ticket);
+    }
+
+    public Ticket reanalyzeTicket(String tenantId, String ticketId, String actorUserId) {
+        tenantService.requireActiveTenant(tenantId);
+        Ticket ticket = ticketRepository.findByTenantIdAndId(tenantId, ticketId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
+        if (ticket.getStatus() == TicketStatus.CLOSED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Closed tickets cannot be classified");
+        }
+        operationalUserService.validateActiveActor(tenantId, actorUserId);
+        return recordClassificationAttempt(ticket, TicketClassificationTrigger.MANUAL_REANALYSIS, actorUserId);
+    }
+
+    private Ticket recordClassificationAttempt(Ticket ticket, TicketClassificationTrigger trigger, String actorUserId) {
+        Instant requestedAt = Instant.now();
+        try {
+            TicketClassificationResponse response = aiClassificationClient.classify(new TicketClassificationRequest(
+                    ticket.getTenantId(),
+                    ticket.getId(),
+                    ticket.getSubject(),
+                    ticket.getCustomerMessage()
+            ));
+            Instant completedAt = Instant.now();
+            TicketClassificationAttempt attempt = TicketClassificationAttempt.success(
+                    trigger,
+                    actorUserId,
+                    requestedAt,
+                    completedAt,
+                    response.category(),
+                    response.urgency(),
+                    response.sentiment(),
+                    response.priority(),
+                    response.confidence(),
+                    response.classifierVersion()
+            );
+            ticket.getClassificationAttempts().add(attempt);
+            applySuccessfulClassification(ticket, attempt, actorUserId, completedAt);
+            return ticketRepository.save(ticket);
+        } catch (TicketClassificationException exception) {
+            Instant completedAt = Instant.now();
+            ticket.getClassificationAttempts().add(TicketClassificationAttempt.failed(
+                    trigger,
+                    actorUserId,
+                    requestedAt,
+                    completedAt,
+                    exception.getErrorCode(),
+                    exception.getMessage()
+            ));
+            return ticketRepository.save(ticket);
+        }
+    }
+
+    private void applySuccessfulClassification(Ticket ticket, TicketClassificationAttempt attempt, String actorUserId,
+            Instant occurredAt) {
+        List<TicketFieldChange> changes = new ArrayList<>();
+        if (!Objects.equals(ticket.getCategory(), attempt.getCategory())) {
+            changes.add(new TicketFieldChange("category", ticket.getCategory(), attempt.getCategory()));
+            ticket.setCategory(attempt.getCategory());
+        }
+        if (ticket.getPriority() != attempt.getPriority()) {
+            changes.add(new TicketFieldChange("priority", enumValue(ticket.getPriority()),
+                    enumValue(attempt.getPriority())));
+            ticket.setPriority(attempt.getPriority());
+        }
+        if (!changes.isEmpty()) {
+            ticket.setUpdatedAt(occurredAt);
+            ticket.getHistory().add(new TicketHistoryEntry(
+                    TicketHistoryEventType.AI_CLASSIFICATION_APPLIED,
+                    actorUserId,
+                    attempt.getId(),
+                    occurredAt,
+                    changes
+            ));
+        }
     }
 
     private String enumValue(Enum<?> value) {
