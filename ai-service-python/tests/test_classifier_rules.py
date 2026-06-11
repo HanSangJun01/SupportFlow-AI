@@ -123,4 +123,4 @@ def test_classifier_is_deterministic_for_same_request() -> None:
         message="The invoice payment page has an error.",
     )
 
-    assert classify_with_rules(request) == classify_with_rules(request)
+    assert classify_with_rules(request).model_dump() == classify_with_rules(request).model_dump()

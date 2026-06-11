@@ -2,8 +2,9 @@ from fastapi import FastAPI
 
 from app.classifier import classify_with_rules
 from app.models import ClassificationRequest, ClassificationResponse, HealthResponse
+from app.settings import SERVICE_NAME, SERVICE_VERSION
 
-app = FastAPI(title="SupportFlow AI Service", version="0.1.0")
+app = FastAPI(title=SERVICE_NAME, version=SERVICE_VERSION)
 
 
 @app.get("/health", response_model=HealthResponse)
