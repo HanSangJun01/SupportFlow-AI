@@ -8,6 +8,7 @@ public class TicketHistoryEntry {
 
     private TicketHistoryEventType eventType;
     private String actorUserId;
+    private String classificationAttemptId;
     private Instant occurredAt;
     private List<TicketFieldChange> changes = new ArrayList<>();
 
@@ -18,6 +19,15 @@ public class TicketHistoryEntry {
             List<TicketFieldChange> changes) {
         this.eventType = eventType;
         this.actorUserId = actorUserId;
+        this.occurredAt = occurredAt;
+        setChanges(changes);
+    }
+
+    public TicketHistoryEntry(TicketHistoryEventType eventType, String actorUserId, String classificationAttemptId,
+            Instant occurredAt, List<TicketFieldChange> changes) {
+        this.eventType = eventType;
+        this.actorUserId = actorUserId;
+        this.classificationAttemptId = classificationAttemptId;
         this.occurredAt = occurredAt;
         setChanges(changes);
     }
@@ -36,6 +46,14 @@ public class TicketHistoryEntry {
 
     public void setActorUserId(String actorUserId) {
         this.actorUserId = actorUserId;
+    }
+
+    public String getClassificationAttemptId() {
+        return classificationAttemptId;
+    }
+
+    public void setClassificationAttemptId(String classificationAttemptId) {
+        this.classificationAttemptId = classificationAttemptId;
     }
 
     public Instant getOccurredAt() {

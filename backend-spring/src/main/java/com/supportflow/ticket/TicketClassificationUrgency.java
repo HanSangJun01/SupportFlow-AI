@@ -1,9 +1,8 @@
 package com.supportflow.ticket;
 
-public enum TicketPriority {
+public enum TicketClassificationUrgency {
     LOW,
-    MEDIUM,
     NORMAL,
     HIGH,
-    URGENT
+    CRITICAL
 }

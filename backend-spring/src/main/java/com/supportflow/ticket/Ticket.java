@@ -27,6 +27,7 @@ public class Ticket {
     private Instant createdAt;
     private Instant updatedAt;
     private List<TicketHistoryEntry> history = new ArrayList<>();
+    private List<TicketClassificationAttempt> classificationAttempts = new ArrayList<>();
 
     public String getId() {
         return id;
@@ -133,5 +134,18 @@ public class Ticket {
 
     public void setHistory(List<TicketHistoryEntry> history) {
         this.history = history == null ? new ArrayList<>() : new ArrayList<>(history);
+    }
+
+    public List<TicketClassificationAttempt> getClassificationAttempts() {
+        if (classificationAttempts == null) {
+            classificationAttempts = new ArrayList<>();
+        }
+        return classificationAttempts;
+    }
+
+    public void setClassificationAttempts(List<TicketClassificationAttempt> classificationAttempts) {
+        this.classificationAttempts = classificationAttempts == null
+                ? new ArrayList<>()
+                : new ArrayList<>(classificationAttempts);
     }
 }
