@@ -195,16 +195,14 @@ public class TicketService {
                     enumValue(attempt.getPriority())));
             ticket.setPriority(attempt.getPriority());
         }
-        if (!changes.isEmpty()) {
-            ticket.setUpdatedAt(occurredAt);
-            ticket.getHistory().add(new TicketHistoryEntry(
-                    TicketHistoryEventType.AI_CLASSIFICATION_APPLIED,
-                    actorUserId,
-                    attempt.getId(),
-                    occurredAt,
-                    changes
-            ));
-        }
+        ticket.setUpdatedAt(occurredAt);
+        ticket.getHistory().add(new TicketHistoryEntry(
+                TicketHistoryEventType.AI_CLASSIFICATION_APPLIED,
+                actorUserId,
+                attempt.getId(),
+                occurredAt,
+                changes
+        ));
     }
 
     private String enumValue(Enum<?> value) {

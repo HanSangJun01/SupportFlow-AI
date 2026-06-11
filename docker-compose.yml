@@ -13,10 +13,19 @@ services:
     container_name: supportflow-backend
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/supportflow
+      SUPPORTFLOW_AI_CLASSIFICATION_BASE_URL: http://ai-service:8000
     ports:
       - "8080:8080"
     depends_on:
       - mongodb
+      - ai-service
+
+  ai-service:
+    build:
+      context: ./ai-service-python
+    container_name: supportflow-ai-service
+    ports:
+      - "8000:8000"
 
   redis:
     image: redis:7
